@@ -130,7 +130,7 @@ local function InitAntiBomb()
     end
 
     local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
-    local ReturnYCoordinate = 70000
+    local ReturnYCoordinate = 50000
     local MoveSpeed = 150000
 
     task.spawn(function()
