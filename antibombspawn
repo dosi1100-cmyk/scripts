@@ -1,0 +1,253 @@
+local function InitAntiBomb()
+    if getgenv().AntiBombRunning then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "[ ⚠️안티 폭탄 ]",
+            Text = "이미 켜져있습니다.",
+            Duration = 3
+        })
+        return
+    end
+
+    getgenv().AntiBombRunning = true
+
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "[ ✅안티 폭탄 ]",
+        Text = "안티 폭탄 스크립트가 켜졌습니다.",
+        Duration = 3
+    })
+
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local RunService = game:GetService("RunService")
+    local Workspace = game:GetService("Workspace")
+
+    local LocalPlayer = Players.LocalPlayer
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+    local OriginalCFrame = HumanoidRootPart.CFrame
+    local SetupCoordinate = Vector3.new(484, 134, 207)
+
+    local TargetBombNames = {
+        ["BombMissile"] = true,
+        ["BombDarkMatter"] = true,
+        ["BombBalloon"] = true,
+        ["BallSnowball"] = true,
+        ["BalloonModel"] = true     
+    }
+
+    local ButtonSequence = {"Button1", "Button2", "ButtonOven", "Button3", "Button4"}
+
+    local spawnRemote = ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("SpawnToyRemoteFunction")
+    local interactRemote = ReplicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
+
+    local function SpawnOvenAndAcquire()
+        local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
+        local myToyFolder = Workspace:FindFirstChild(myToyFolderName)
+        if myToyFolder then
+            local existingOven = myToyFolder:FindFirstChild("OvenDarkGray")
+            if existingOven then
+                existingOven:Destroy()
+                task.wait(0.1)
+            end
+        end
+
+        if HumanoidRootPart then
+            HumanoidRootPart.CFrame = CFrame.new(SetupCoordinate)
+        end
+
+        local spawnPos = HumanoidRootPart.CFrame * CFrame.new(0, 1, 5)
+        task.spawn(function()
+            spawnRemote:InvokeServer(
+                "OvenDarkGray",
+                spawnPos,
+                Vector3.new(0, 0, 0)
+            )
+        end)
+
+        myToyFolder = Workspace:WaitForChild(myToyFolderName, 5)
+        if not myToyFolder then
+            return nil
+        end
+
+        local myOven = myToyFolder:WaitForChild("OvenDarkGray", 5)
+        if not myOven then
+            return nil
+        end
+
+        local ovenMain = myOven:WaitForChild("Main", 3)
+
+        task.wait(0.12)
+
+        if HumanoidRootPart and ovenMain then
+            HumanoidRootPart.CFrame = ovenMain.CFrame * CFrame.new(0, 0, 5)
+        end
+
+        local soundPart = myOven:WaitForChild("SoundPart", 3)
+        if soundPart then
+            interactRemote:FireServer(soundPart, soundPart.CFrame)
+        end
+
+        for _, btnName in ipairs(ButtonSequence) do
+            local btn = myOven:FindFirstChild(btnName) or myOven:WaitForChild(btnName, 1)
+            if btn then
+                interactRemote:FireServer(btn, btn.CFrame)
+            end
+        end
+
+        if HumanoidRootPart then
+            HumanoidRootPart.CFrame = OriginalCFrame
+        end
+
+        local partOwnerFound = false
+        local searchStart = tick()
+        while tick() - searchStart < 0.5 do
+            local function SearchForPartOwner(parent)
+                for _, child in pairs(parent:GetChildren()) do
+                    if child.Name == "PartOwner" then
+                        return true
+                    end
+                    if SearchForPartOwner(child) then
+                        return true
+                    end
+                end
+                return false
+            end
+
+            if SearchForPartOwner(myOven) then
+                partOwnerFound = true
+                break
+            end
+            task.wait(0.05)
+        end
+
+        if partOwnerFound then
+            return myOven
+        else
+            task.wait(0.3)
+            return nil
+        end
+    end
+
+    local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
+    local SafeZoneCFrame = CFrame.new(0, 50000, 0)
+
+    task.spawn(function()
+        local myOven = nil
+        local ovenMain = nil
+
+        while getgenv().AntiBombRunning do
+            if not myOven or not myOven.Parent then
+                myOven = nil
+                ovenMain = nil
+                
+                local retryCount = 0
+                while getgenv().AntiBombRunning and retryCount < 5 do
+                    myOven = SpawnOvenAndAcquire()
+                    if myOven then
+                        ovenMain = myOven:WaitForChild("Main", 3)
+                        if ovenMain then
+                            break
+                        end
+                    end
+                    retryCount = retryCount + 1
+                    task.wait(0.1)
+                end
+
+                if not myOven or not ovenMain then
+                    game:GetService("StarterGui"):SetCore("SendNotification", {
+                        Title = "[ ⚠️안티 폭탄 ]",
+                        Text = "오븐 소환 5회 실패로 스크립트가 종료됩니다.",
+                        Duration = 3
+                    })
+                    getgenv().AntiBombRunning = false
+                    break
+                end
+            end
+
+            if not getgenv().AntiBombRunning then
+                break
+            end
+
+            local foundTarget = nil
+            local targetCFrame = nil
+
+            for _, folder in pairs(Workspace:GetChildren()) do
+                if string.sub(folder.Name, -13) == "SpawnedInToys" then
+                    if folder.Name == myToyFolderName then
+                        continue 
+                    end
+                    for _, toy in pairs(folder:GetChildren()) do
+                        if TargetBombNames[toy.Name] then
+                            foundTarget = toy
+                            break
+                        end
+                    end
+                end
+                if foundTarget then break end
+            end
+
+            if not foundTarget then
+                local balloonsFolder = Workspace:FindFirstChild("Balloons")
+                if balloonsFolder then
+                    for _, toy in pairs(balloonsFolder:GetChildren()) do
+                        if TargetBombNames[toy.Name] then
+                            foundTarget = toy
+                            break
+                        end
+                    end
+                end
+            end
+
+            if foundTarget and foundTarget.Parent and foundTarget.Parent.Name == myToyFolderName then
+                foundTarget = nil 
+            end
+
+            if foundTarget then
+                if foundTarget.Name == "BombBalloon" or foundTarget.Name == "BalloonModel" then
+                    targetCFrame = foundTarget:GetPivot()
+                elseif foundTarget:FindFirstChild("Main") then
+                    targetCFrame = foundTarget.Main.CFrame
+                end
+
+                if targetCFrame then
+                    for i = 1, 15 do
+                        if not foundTarget or not foundTarget.Parent then break end
+                        
+                        if not myOven or not myOven.Parent or not ovenMain or not ovenMain.Parent then break end
+
+                        if foundTarget.Name == "BombBalloon" or foundTarget.Name == "BalloonModel" then
+                            targetCFrame = foundTarget:GetPivot()
+                        elseif foundTarget:FindFirstChild("Main") then
+                            targetCFrame = foundTarget.Main.CFrame
+                        end
+                        
+                        if not targetCFrame then break end
+
+                        ovenMain.CFrame = targetCFrame
+                        ovenMain.Velocity = Vector3.zero
+                        ovenMain.RotVelocity = Vector3.zero
+                        RunService.Heartbeat:Wait()
+
+                        ovenMain.CFrame = SafeZoneCFrame
+                        ovenMain.Velocity = Vector3.zero
+                        ovenMain.RotVelocity = Vector3.zero
+                        RunService.Heartbeat:Wait()
+                    end
+                else
+                    task.wait()
+                end
+            else
+                if ovenMain and ovenMain.Parent then
+                    ovenMain.CFrame = SafeZoneCFrame
+                    ovenMain.Velocity = Vector3.zero
+                    ovenMain.RotVelocity = Vector3.zero
+                end
+                task.wait()
+            end
+        end
+        getgenv().AntiBombRunning = false
+    end)
+end
+
+InitAntiBomb()
