@@ -130,32 +130,11 @@ local function InitAntiBomb()
     end
 
     local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
-    local ReturnYCoordinate = 50000
-    local MoveSpeed = 150000
+    local SafeZoneCFrame = CFrame.new(0, 50000, 0)
 
     task.spawn(function()
         local myOven = nil
         local ovenMain = nil
-
-        local function MoveOven(targetPosition)
-            while getgenv().AntiBombRunning and ovenMain and ovenMain.Parent do
-                local currentPos = ovenMain.Position
-                local distance = (targetPosition - currentPos).Magnitude
-                local step = MoveSpeed * RunService.Heartbeat:Wait()
-
-                if step >= distance then
-                    ovenMain.CFrame = CFrame.new(targetPosition)
-                    ovenMain.Velocity = Vector3.zero
-                    ovenMain.RotVelocity = Vector3.zero
-                    break
-                else
-                    local direction = (targetPosition - currentPos).Unit
-                    ovenMain.CFrame = CFrame.new(currentPos + direction * step)
-                    ovenMain.Velocity = Vector3.zero
-                    ovenMain.RotVelocity = Vector3.zero
-                end
-            end
-        end
 
         while getgenv().AntiBombRunning do
             if not myOven or not myOven.Parent then
@@ -234,6 +213,7 @@ local function InitAntiBomb()
                 if targetCFrame then
                     for i = 1, 15 do
                         if not foundTarget or not foundTarget.Parent then break end
+                        
                         if not myOven or not myOven.Parent or not ovenMain or not ovenMain.Parent then break end
 
                         if foundTarget.Name == "BombBalloon" or foundTarget.Name == "BalloonModel" then
@@ -244,18 +224,24 @@ local function InitAntiBomb()
                         
                         if not targetCFrame then break end
 
-                        local targetPos = targetCFrame.Position
-                        local returnPos = Vector3.new(targetPos.X, ReturnYCoordinate, targetPos.Z)
+                        ovenMain.CFrame = targetCFrame
+                        ovenMain.Velocity = Vector3.zero
+                        ovenMain.RotVelocity = Vector3.zero
+                        RunService.Heartbeat:Wait()
 
-                        MoveOven(targetPos)
-                        MoveOven(returnPos)
+                        ovenMain.CFrame = SafeZoneCFrame
+                        ovenMain.Velocity = Vector3.zero
+                        ovenMain.RotVelocity = Vector3.zero
+                        RunService.Heartbeat:Wait()
                     end
                 else
                     task.wait()
                 end
             else
                 if ovenMain and ovenMain.Parent then
-                    MoveOven(Vector3.new(0, ReturnYCoordinate, 0))
+                    ovenMain.CFrame = SafeZoneCFrame
+                    ovenMain.Velocity = Vector3.zero
+                    ovenMain.RotVelocity = Vector3.zero
                 end
                 task.wait()
             end
