@@ -1,0 +1,73 @@
+if getgenv().KickGrabActive then
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "[ ⚠️Kick Grab ]",
+        Text = "이미 켜져있습니다!",
+        Duration = 3
+    })
+    return
+end
+
+getgenv().KickGrabActive = true
+game.StarterGui:SetCore("SendNotification", {
+    Title = "[ ✅Kick Grab ]",
+    Text = "Kick Grab이 켜졌습니다.",
+    Duration = 3
+})
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local plr = Players.LocalPlayer
+local GrabEvents = ReplicatedStorage:WaitForChild("GrabEvents")
+local SetNetworkOwner = GrabEvents:WaitForChild("SetNetworkOwner")
+local DestroyGrabLine = GrabEvents:WaitForChild("DestroyGrabLine")
+
+task.spawn(function()
+    while getgenv().KickGrabActive do
+        local grabParts = workspace:FindFirstChild("GrabParts")
+        if not grabParts then
+            task.wait()
+            continue
+        end
+
+        local gp = grabParts:FindFirstChild("GrabPart")
+        local weld = gp and gp:FindFirstChildOfClass("WeldConstraint")
+        local part1 = weld and weld.Part1
+
+        if part1 then
+            local ownerPlayer = nil
+            for _, pl in ipairs(Players:GetPlayers()) do
+                if pl.Character and part1:IsDescendantOf(pl.Character) then
+                    ownerPlayer = pl
+                    break
+                end
+            end
+
+            if not ownerPlayer then
+                task.wait()
+                continue
+            end
+
+            while getgenv().KickGrabActive and workspace:FindFirstChild("GrabParts") do
+                if ownerPlayer then
+                    local tgtTorso = ownerPlayer.Character and ownerPlayer.Character:FindFirstChild("HumanoidRootPart") 
+                    local tgtHead = ownerPlayer.Character and ownerPlayer.Character:FindFirstChild("Head")
+                    local myTorso = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") 
+
+                    if tgtTorso and myTorso and tgtHead then
+                        pcall(function()
+                            SetNetworkOwner:FireServer(tgtTorso, CFrame.lookAt(myTorso.Position, tgtTorso.Position))
+                        end)
+                        
+                        task.wait()
+                        
+                        pcall(function()
+                            DestroyGrabLine:FireServer(tgtHead)
+                        end)
+                    end
+                end
+                task.wait()
+            end
+        end
+        task.wait()
+    end
+end)
