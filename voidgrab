@@ -1,0 +1,67 @@
+if getgenv().LoopGrabActive then
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Void Grab",
+        Text = "이미 켜져있습니다!",
+        Duration = 3
+    })
+    return -- 이미 켜져있으므로 아래 코드는 무시하고 종료
+end
+
+-- 켜짐 상태로 변경 및 알림
+getgenv().LoopGrabActive = true
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Void Grab",
+    Text = "bozi Grab이 켜졌습니다.",
+    Duration = 3
+})
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local plr = Players.LocalPlayer
+
+task.spawn(function()
+    while getgenv().LoopGrabActive do
+        local grabParts = workspace:FindFirstChild("GrabParts")
+        if not grabParts then
+            task.wait()
+            continue
+        end
+
+        local gp = grabParts:FindFirstChild("GrabPart")
+        local weld = gp and gp:FindFirstChildOfClass("WeldConstraint")
+        local part1 = weld and weld.Part1
+
+        if part1 then
+            local ownerPlayer = nil
+            for _, pl in ipairs(Players:GetPlayers()) do
+                if pl.Character and part1:IsDescendantOf(pl.Character) then
+                    ownerPlayer = pl
+                    break
+                end
+            end
+
+            while getgenv().LoopGrabActive and workspace:FindFirstChild("GrabParts") do
+                -- 파트가 앵커되어 있지 않을 때만 공허로 보내도록 조건 추가
+                if not part1.Anchored then
+                    if ownerPlayer then
+                        local tgtTorso = ownerPlayer.Character and ownerPlayer.Character:FindFirstChild("HumanoidRootPart") 
+                        
+                        if tgtTorso then
+                            pcall(function()
+                                tgtTorso.CFrame = CFrame.new(tgtTorso.Position.X, -59999, tgtTorso.Position.Z)
+                            end)
+                        end
+                    else
+                        if part1.Parent then
+                            pcall(function()
+                                part1.CFrame = CFrame.new(part1.Position.X, -59999, part1.Position.Z)
+                            end)
+                        end
+                    end
+                end
+                task.wait()
+            end
+        end
+        task.wait()
+    end
+end)
