@@ -1,0 +1,125 @@
+-- Version: v1.4
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local plr = Players.LocalPlayer
+
+local ifKickThenT = true
+local anchoredCache = {}
+
+local guiName = "KickNotifySystem_Stack"
+local existingGui = CoreGui:FindFirstChild(guiName)
+if existingGui then
+    existingGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = guiName
+ScreenGui.ResetOnSpawn = false
+
+if syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = CoreGui
+elseif gethui then
+    ScreenGui.Parent = gethui()
+else
+    ScreenGui.Parent = CoreGui
+end
+
+local Container = Instance.new("Frame")
+Container.Name = "NotifyContainer"
+Container.Size = UDim2.new(0, 320, 1, -20)
+Container.Position = UDim2.new(0, 20, 0, 0)
+Container.BackgroundTransparency = 1
+Container.Parent = ScreenGui
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = Container
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+UIListLayout.Padding = UDim.new(0, 8)
+
+local function CustomNotify(title, content, duration)
+    local frame = Instance.new("Frame")
+    frame.Name = "NotifyFrame"
+    frame.Size = UDim2.new(1, 0, 0, 65)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BorderSizePixel = 2
+    frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    frame.Parent = Container
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -10, 0, 25)
+    titleLabel.Position = UDim2.new(0, 10, 0, 5)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 20
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = frame
+
+    local contentLabel = Instance.new("TextLabel")
+    contentLabel.Size = UDim2.new(1, -10, 0, 25)
+    contentLabel.Position = UDim2.new(0, 10, 0, 32)
+    contentLabel.BackgroundTransparency = 1
+    contentLabel.Text = content
+    contentLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+    contentLabel.TextSize = 17
+    contentLabel.Font = Enum.Font.Gotham
+    contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+    contentLabel.Parent = frame
+    
+    task.delay(duration, function()
+        if frame then frame:Destroy() end
+    end)
+end
+
+local function ifKickThenF()
+    for _, otherPlr in ipairs(Players:GetPlayers()) do
+        if otherPlr.Character then
+            local hrp = otherPlr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                anchoredCache[otherPlr] = hrp.Anchored == true
+            end
+        end
+    end
+
+    Players.PlayerAdded:Connect(function(newPlr)
+        newPlr.CharacterAdded:Connect(function(char)
+            local hrp = char:WaitForChild("HumanoidRootPart", 5)
+            if hrp then
+                anchoredCache[newPlr] = false
+            end
+        end)
+    end)
+
+    Players.PlayerRemoving:Connect(function(leavingPlr)
+        if anchoredCache[leavingPlr] == true then
+            local DISP = leavingPlr.DisplayName
+            local NAP = leavingPlr.Name
+            
+            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] ( @" .. NAP ..  ")", 8)
+        end
+        anchoredCache[leavingPlr] = nil
+    end)
+
+    task.spawn(function()
+        while ifKickThenT do
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p.Character then
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        anchoredCache[p] = hrp.Anchored == true
+                    end
+                end
+            end
+            task.wait(0.3)
+        end
+    end)
+end
+
+ifKickThenF()
+
+CustomNotify("Script Loaded", "Kick Notification Actived", 3)
