@@ -1,0 +1,110 @@
+local allowedWebhooks = {
+    "https://discord.com/api/webhooks/1478713426535518382/fxXTombHq1uU3FQvV7IbFtYROpl4_8emoDl5-RYQIQnGhKdjxWZdJE1qdhpBwutfi6VY"
+}
+
+local blockedKeywords = {
+    "discord.com/api/webhooks",
+    "discordapp.com/api/webhooks",
+    "webhook",
+    "api.telegram.org",
+    "guilded.gg/api/webhooks",
+    "hooks.hyra.io",
+    "webhook.lewisakura.moe",
+    "webhook.pm"
+}
+
+local function isBlocked(url)
+    if type(url) ~= "string" then return false end
+    
+    for _, allowedUrl in ipairs(allowedWebhooks) do
+        if string.find(url, allowedUrl, 1, true) then
+            return false
+        end
+    end
+
+    local lowerUrl = string.lower(url)
+    for _, keyword in ipairs(blockedKeywords) do
+        if string.find(lowerUrl, keyword) then
+            return true
+        end
+    end
+    return false
+end
+
+local env = getgenv and getgenv() or _G
+local requestFunctions = {
+    env.request,
+    env.http_request,
+    (env.http and env.http.request),
+    (env.syn and env.syn.request),
+    (env.fluxus and env.fluxus.request)
+}
+
+for _, reqFunc in pairs(requestFunctions) do
+    if type(reqFunc) == "function" then
+        local oldReq
+        oldReq = hookfunction(reqFunc, newcclosure(function(reqOptions, ...)
+            if type(reqOptions) == "table" and isBlocked(reqOptions.Url) then
+                warn("[웹훅 차단됨] HTTP 함수를 통한 전송이 차단되었습니다. URL: " .. tostring(reqOptions.Url))
+                return {
+                    Success = false,
+                    StatusCode = 403,
+                    StatusMessage = "Forbidden",
+                    Headers = {},
+                    Body = "Webhook Blocked"
+                }
+            elseif type(reqOptions) == "string" and isBlocked(reqOptions) then
+                warn("[웹훅 차단됨] HTTP 함수를 통한 전송이 차단되었습니다. URL: " .. tostring(reqOptions))
+                return {
+                    Success = false,
+                    StatusCode = 403,
+                    StatusMessage = "Forbidden",
+                    Headers = {},
+                    Body = "Webhook Blocked"
+                }
+            end
+            return oldReq(reqOptions, ...)
+        end))
+    end
+end
+
+local HttpService = game:GetService("HttpService")
+local gm = getrawmetatable(game)
+if gm then
+    setreadonly(gm, false)
+
+    local oldNamecall = gm.__namecall
+    gm.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+
+        if self == HttpService then
+            if method == "PostAsync" then
+                local args = {...}
+                local url = args[1]
+                if isBlocked(url) then
+                    warn("[웹훅 차단됨] HttpService:PostAsync 우회 전송이 차단되었습니다. URL: " .. tostring(url))
+                    return ""
+                end
+            elseif method == "RequestAsync" then
+                local args = {...}
+                local reqTable = args[1]
+                if type(reqTable) == "table" and isBlocked(reqTable.Url) then
+                    warn("[웹훅 차단됨] HttpService:RequestAsync 우회 전송이 차단되었습니다. URL: " .. tostring(reqTable.Url))
+                    return {
+                        Success = false,
+                        StatusCode = 403,
+                        StatusMessage = "Forbidden",
+                        Headers = {},
+                        Body = "Webhook Blocked"
+                    }
+                end
+            end
+        end
+
+        return oldNamecall(self, ...)
+    end)
+
+    setreadonly(gm, true)
+end
+
+print("개인정보 전송 차단 시작")
