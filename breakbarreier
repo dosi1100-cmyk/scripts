@@ -1,0 +1,120 @@
+local uis = game:GetService("UserInputService")
+local rs = game:GetService("ReplicatedStorage")
+local plr = game:GetService("Players").LocalPlayer
+local inv = workspace:WaitForChild(plr.Name .. "SpawnedInToys")
+local StarterGui = game:GetService("StarterGui")
+
+if _G.PBD_OffConnection then
+    _G.PBD_OffConnection:Disconnect()
+    _G.PBD_OffConnection = nil
+end
+
+if _G.PBD_OnConnection then
+    _G.PBD_OnConnection:Disconnect()
+end
+
+if _G.PBDrun == nil then _G.PBDrun = false end
+
+if _G.BarrierToggle_On then
+    StarterGui:SetCore("SendNotification", {
+        Title = "[ ⚠️Breakbarrier ]",
+        Text = "Barrier breaker: [ Already ON ]",
+        Duration = 3
+    })
+else
+    _G.BarrierToggle_On = true
+    _G.BarrierToggle_Off = false
+    StarterGui:SetCore("SendNotification", {
+        Title = "[ ✅Breakbarrier ]",
+        Text = "Barrier breaker: [ ON ] (Key: L)",
+        Duration = 3
+    })
+end
+
+local function PlotBarrierDelete()
+    if _G.PBDrun then return end
+    _G.PBDrun = true
+
+    local char = plr.Character
+    if not char then _G.PBDrun = false return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then _G.PBDrun = false return end
+
+    local metal = workspace.Plots.Plot5.TeslaCoil.Metal
+    if not metal then _G.PBDrun = false return end
+
+    local TP = metal.CFrame
+    local OCF = hrp.CFrame
+
+    task.spawn(function()
+        rs.MenuToys.SpawnToyRemoteFunction:InvokeServer("FoodBread", hrp.CFrame, Vector3.new(0,0,0))
+    end)
+
+    task.wait(0.1)
+
+    local foodBread = inv:FindFirstChild("FoodBread")
+    if not foodBread then _G.PBDrun = false return end
+
+    if foodBread then
+        task.spawn(function()
+            foodBread.HoldPart.HoldItemRemoteFunction:InvokeServer(foodBread, char)
+        end)
+    end
+
+    task.wait(0.1)
+
+    hrp.CFrame = TP
+    task.wait(0.17)
+
+    if foodBread then
+        rs.MenuToys.DestroyToy:FireServer(foodBread)
+    end
+
+    hrp.CFrame = OCF
+    task.wait(0.4)
+
+    _G.PBDrun = false
+end
+
+_G.PBD_OnConnection = uis.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    if input.KeyCode == Enum.KeyCode.L then
+        if not _G.PBDrun then
+            task.spawn(function()
+                PlotBarrierDelete()
+            end)
+        end
+    end
+end)
+
+--[[
+local uis = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+
+if _G.PBD_OnConnection then
+    _G.PBD_OnConnection:Disconnect()
+    _G.PBD_OnConnection = nil
+end
+
+if _G.PBD_OffConnection then
+    _G.PBD_OffConnection:Disconnect()
+    _G.PBD_OffConnection = nil
+end
+
+if _G.BarrierToggle_Off then
+    StarterGui:SetCore("SendNotification", {
+        Title = "[ ⚠️Breakbarrier ]",
+        Text = "Barrier breaker: [ Already OFF ]",
+        Duration = 3
+    })
+else
+    _G.BarrierToggle_Off = true
+    _G.BarrierToggle_On = false
+    StarterGui:SetCore("SendNotification", {
+        Title = "[ 🔴Breakbarrier ]",
+        Text = "Barrier breaker: [ OFF ]",
+        Duration = 3
+    })
+end
+]]
