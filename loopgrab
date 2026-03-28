@@ -1,0 +1,71 @@
+-- Version: v1.3
+if getgenv().LoopGrabActive then
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "[ ⚠️Loop Grab ]",
+        Text = "이미 켜져있습니다!",
+        Duration = 3
+    })
+    return
+end
+
+-- 켜짐 상태로 변경 및 알림
+getgenv().LoopGrabActive = true
+game.StarterGui:SetCore("SendNotification", {
+    Title = "[ ✅Loop Grab ]",
+    Text = "Loop Grab이 켜졌습니다.",
+    Duration = 3
+})
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local plr = Players.LocalPlayer
+local SetNetworkOwner = ReplicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
+
+task.spawn(function()
+    while getgenv().LoopGrabActive do
+        local grabParts = workspace:FindFirstChild("GrabParts")
+        if not grabParts then
+            task.wait()
+            continue
+        end
+
+        local gp = grabParts:FindFirstChild("GrabPart")
+        local weld = gp and gp:FindFirstChildOfClass("WeldConstraint")
+        local part1 = weld and weld.Part1
+
+        if part1 then
+            local ownerPlayer = nil
+            for _, pl in ipairs(Players:GetPlayers()) do
+                if pl.Character and part1:IsDescendantOf(pl.Character) then
+                    ownerPlayer = pl
+                    break
+                end
+            end
+
+            while getgenv().LoopGrabActive and workspace:FindFirstChild("GrabParts") do
+                if ownerPlayer then
+                    local tgtTorso = ownerPlayer.Character and ownerPlayer.Character:FindFirstChild("HumanoidRootPart") 
+                    local tgtHead = ownerPlayer.Character and ownerPlayer.Character:FindFirstChild("Head")
+                    local myTorso = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") 
+
+                    if tgtTorso and myTorso and tgtHead then
+                        pcall(function()
+                            SetNetworkOwner:FireServer(tgtTorso, CFrame.lookAt(myTorso.Position, tgtTorso.Position))
+                        end)
+                    end
+                else
+                    if part1.Parent then
+                        local myTorso = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                        if myTorso then
+                            pcall(function()
+                                SetNetworkOwner:FireServer(part1, CFrame.lookAt(myTorso.Position, part1.Position))
+                            end)
+                        end
+                    end
+                end
+                task.wait()
+            end
+        end
+        task.wait()
+    end
+end)
