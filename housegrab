@@ -85,3 +85,9 @@ StarterGui:SetCore("SendNotification", {
     Text = "스크립트가 켜졌습니다. 작동키 G",
     Duration = 3
 })
+
+if game.PlaceId ~= 6961824067 then return end
+
+local G = game:GetService("ReplicatedStorage"):WaitForChild("GrabEvents")
+G:WaitForChild("EndGrabEarly"):Destroy()
+Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
