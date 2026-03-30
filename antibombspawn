@@ -1,4 +1,3 @@
--- Version: v1.0
 local function InitAntiBomb()
     if getgenv().AntiBombRunning then
         game:GetService("StarterGui"):SetCore("SendNotification", {
