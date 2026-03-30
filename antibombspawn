@@ -32,7 +32,7 @@ local function InitAntiBomb()
         ["BalloonModel"] = true     
     }
 
-    local ButtonSequence = {"Button1", "Button2", "ButtonOven", "Button3", "Button4"}
+    local ButtonSequence = {"ButtonOven"}
 
     local spawnRemote = ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("SpawnToyRemoteFunction")
     local interactRemote = ReplicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
