@@ -1,3 +1,4 @@
+-- Version: v1.0
 local function InitAntiBomb()
     if getgenv().AntiBombRunning then
         game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -22,10 +23,6 @@ local function InitAntiBomb()
     local Workspace = game:GetService("Workspace")
 
     local LocalPlayer = Players.LocalPlayer
-    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-
-    local OriginalCFrame = HumanoidRootPart.CFrame
     local SetupCoordinate = Vector3.new(484, 134, 207)
 
     local TargetBombNames = {
@@ -42,6 +39,19 @@ local function InitAntiBomb()
     local interactRemote = ReplicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
 
     local function SpawnOvenAndAcquire()
+        -- 매번 함수가 실행될 때마다 현재 캐릭터와 상태를 확인합니다.
+        local Character = LocalPlayer.Character
+        local Humanoid = Character and Character:FindFirstChild("Humanoid")
+        local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+
+        -- 캐릭터가 없거나 죽어있으면 중단
+        if not Character or not Humanoid or Humanoid.Health <= 0 or not HumanoidRootPart then
+            return nil
+        end
+
+        -- 스크립트 켤 때가 아닌, 텔레포트하기 직전 위치를 원래 위치로 저장
+        local OriginalCFrame = HumanoidRootPart.CFrame
+
         local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
         local myToyFolder = Workspace:FindFirstChild(myToyFolderName)
         if myToyFolder then
@@ -52,8 +62,11 @@ local function InitAntiBomb()
             end
         end
 
-        if HumanoidRootPart then
+        -- 이동 전 생존 여부를 한 번 더 체크
+        if HumanoidRootPart and Humanoid.Health > 0 then
             HumanoidRootPart.CFrame = CFrame.new(SetupCoordinate)
+        else
+            return nil
         end
 
         local spawnPos = HumanoidRootPart.CFrame * CFrame.new(0, 1, 5)
@@ -79,7 +92,7 @@ local function InitAntiBomb()
 
         task.wait(0.12)
 
-        if HumanoidRootPart and ovenMain then
+        if HumanoidRootPart and ovenMain and Humanoid.Health > 0 then
             HumanoidRootPart.CFrame = ovenMain.CFrame * CFrame.new(0, 0, 5)
         end
 
@@ -95,7 +108,8 @@ local function InitAntiBomb()
             end
         end
 
-        if HumanoidRootPart then
+        -- 소환 및 소유권 획득 작업이 끝나면 직전 위치로 복귀
+        if HumanoidRootPart and Humanoid.Health > 0 then
             HumanoidRootPart.CFrame = OriginalCFrame
         end
 
@@ -130,19 +144,56 @@ local function InitAntiBomb()
     end
 
     local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
-    local SafeZoneCFrame = CFrame.new(0, 50000, 0)
+    local ReturnYCoordinate = 70000
+    local MoveSpeed = 300000
 
     task.spawn(function()
         local myOven = nil
         local ovenMain = nil
 
+        local function MoveOven(targetPosition)
+            while getgenv().AntiBombRunning and ovenMain and ovenMain.Parent do
+                local currentPos = ovenMain.Position
+                local distance = (targetPosition - currentPos).Magnitude
+                local step = MoveSpeed * RunService.Heartbeat:Wait()
+
+                if step >= distance then
+                    ovenMain.CFrame = CFrame.new(targetPosition)
+                    ovenMain.Velocity = Vector3.zero
+                    ovenMain.RotVelocity = Vector3.zero
+                    break
+                else
+                    local direction = (targetPosition - currentPos).Unit
+                    ovenMain.CFrame = CFrame.new(currentPos + direction * step)
+                    ovenMain.Velocity = Vector3.zero
+                    ovenMain.RotVelocity = Vector3.zero
+                end
+            end
+        end
+
         while getgenv().AntiBombRunning do
+            local Character = LocalPlayer.Character
+            local Humanoid = Character and Character:FindFirstChild("Humanoid")
+            
+            -- 플레이어가 죽었을 경우 텔레포트 및 소환 등 모든 작동을 일시 중지하고 대기
+            if not Character or not Humanoid or Humanoid.Health <= 0 then
+                task.wait(1)
+                continue
+            end
+
             if not myOven or not myOven.Parent then
                 myOven = nil
                 ovenMain = nil
                 
                 local retryCount = 0
                 while getgenv().AntiBombRunning and retryCount < 5 do
+                    -- 소환 시도 전 다시 한번 사망 체크
+                    local currentCharacter = LocalPlayer.Character
+                    local currentHumanoid = currentCharacter and currentCharacter:FindFirstChild("Humanoid")
+                    if not currentCharacter or not currentHumanoid or currentHumanoid.Health <= 0 then
+                        break
+                    end
+
                     myOven = SpawnOvenAndAcquire()
                     if myOven then
                         ovenMain = myOven:WaitForChild("Main", 3)
@@ -154,7 +205,12 @@ local function InitAntiBomb()
                     task.wait(0.1)
                 end
 
-                if not myOven or not ovenMain then
+                if not getgenv().AntiBombRunning then
+                    break
+                end
+                
+                -- 죽어서 중단된 게 아니라 정말로 소환에 5번 실패한 경우에만 스크립트 종료
+                if (not myOven or not ovenMain) and retryCount >= 5 then
                     game:GetService("StarterGui"):SetCore("SendNotification", {
                         Title = "[ ⚠️안티 폭탄 ]",
                         Text = "오븐 소환 5회 실패로 스크립트가 종료됩니다.",
@@ -213,7 +269,6 @@ local function InitAntiBomb()
                 if targetCFrame then
                     for i = 1, 15 do
                         if not foundTarget or not foundTarget.Parent then break end
-                        
                         if not myOven or not myOven.Parent or not ovenMain or not ovenMain.Parent then break end
 
                         if foundTarget.Name == "BombBalloon" or foundTarget.Name == "BalloonModel" then
@@ -224,24 +279,18 @@ local function InitAntiBomb()
                         
                         if not targetCFrame then break end
 
-                        ovenMain.CFrame = targetCFrame
-                        ovenMain.Velocity = Vector3.zero
-                        ovenMain.RotVelocity = Vector3.zero
-                        RunService.Heartbeat:Wait()
+                        local targetPos = targetCFrame.Position
+                        local returnPos = Vector3.new(targetPos.X, ReturnYCoordinate, targetPos.Z)
 
-                        ovenMain.CFrame = SafeZoneCFrame
-                        ovenMain.Velocity = Vector3.zero
-                        ovenMain.RotVelocity = Vector3.zero
-                        RunService.Heartbeat:Wait()
+                        MoveOven(targetPos)
+                        MoveOven(returnPos)
                     end
                 else
                     task.wait()
                 end
             else
                 if ovenMain and ovenMain.Parent then
-                    ovenMain.CFrame = SafeZoneCFrame
-                    ovenMain.Velocity = Vector3.zero
-                    ovenMain.RotVelocity = Vector3.zero
+                    MoveOven(Vector3.new(0, ReturnYCoordinate, 0))
                 end
                 task.wait()
             end
