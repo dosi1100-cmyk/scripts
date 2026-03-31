@@ -1,6 +1,6 @@
 if getgenv().NoclipGrab then
     game.StarterGui:SetCore("SendNotification", {
-        Title = "NoclipGrab",
+        Title = "[ ⚠️NoclipGrab ]",
         Text = "이미 켜져있습니다!",
         Duration = 3
     })
@@ -9,8 +9,8 @@ end
 
 getgenv().NoclipGrab = true
 game.StarterGui:SetCore("SendNotification", {
-    Title = "NoclipGrab",
-    Text = "기능이 켜졌습니다! (v1.5)",
+    Title = "[ 🟢NoclipGrab ]",
+    Text = "기능이 켜졌습니다!",
     Duration = 3
 })
 
@@ -29,18 +29,22 @@ task.spawn(function()
                     local part1 = weld and weld.Part1
 
                     if part1 then
-                        if part1:IsA("BasePart") and not part1.Anchored then
-                            part1.CanCollide = false
-                            grabbedThisFrame[part1] = true
+                        local function processPart(p)
+                            if p:IsA("BasePart") and not p.Anchored then
+                                if trackedParts[p] == nil then
+                                    trackedParts[p] = p.CanCollide
+                                end
+                                p.CanCollide = false
+                                grabbedThisFrame[p] = true
+                            end
                         end
+
+                        processPart(part1)
                         
                         local model = part1:FindFirstAncestorOfClass("Model")
                         if model and model ~= workspace then
                             for _, desc in ipairs(model:GetDescendants()) do
-                                if desc:IsA("BasePart") and not desc.Anchored then
-                                    desc.CanCollide = false
-                                    grabbedThisFrame[desc] = true
-                                end
+                                processPart(desc)
                             end
                         end
                     end
@@ -48,25 +52,21 @@ task.spawn(function()
             end
         end
 
-        for part, _ in pairs(trackedParts) do
+        for part, originalState in pairs(trackedParts) do
             if not grabbedThisFrame[part] then
                 if part and part.Parent then
-                    part.CanCollide = true
+                    part.CanCollide = originalState
                 end
                 trackedParts[part] = nil
             end
         end
 
-        for part, _ in pairs(grabbedThisFrame) do
-            trackedParts[part] = true
-        end
-
         task.wait()
     end
 
-    for part, _ in pairs(trackedParts) do
+    for part, originalState in pairs(trackedParts) do
         if part and part.Parent then
-            part.CanCollide = true
+            part.CanCollide = originalState
         end
     end
     trackedParts = {}
