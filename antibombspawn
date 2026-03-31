@@ -144,31 +144,10 @@ local function InitAntiBomb()
 
     local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
     local ReturnYCoordinate = 70000
-    local MoveSpeed = 300000
 
     task.spawn(function()
         local myOven = nil
         local ovenMain = nil
-
-        local function MoveOven(targetPosition)
-            while getgenv().AntiBombRunning and ovenMain and ovenMain.Parent do
-                local currentPos = ovenMain.Position
-                local distance = (targetPosition - currentPos).Magnitude
-                local step = MoveSpeed * RunService.Heartbeat:Wait()
-
-                if step >= distance then
-                    ovenMain.CFrame = CFrame.new(targetPosition)
-                    ovenMain.Velocity = Vector3.zero
-                    ovenMain.RotVelocity = Vector3.zero
-                    break
-                else
-                    local direction = (targetPosition - currentPos).Unit
-                    ovenMain.CFrame = CFrame.new(currentPos + direction * step)
-                    ovenMain.Velocity = Vector3.zero
-                    ovenMain.RotVelocity = Vector3.zero
-                end
-            end
-        end
 
         while getgenv().AntiBombRunning do
             local Character = LocalPlayer.Character
@@ -281,15 +260,27 @@ local function InitAntiBomb()
                         local targetPos = targetCFrame.Position
                         local returnPos = Vector3.new(targetPos.X, ReturnYCoordinate, targetPos.Z)
 
-                        MoveOven(targetPos)
-                        MoveOven(returnPos)
+                        -- 타겟 좌표로 즉시 텔레포트
+                        ovenMain.CFrame = CFrame.new(targetPos)
+                        ovenMain.Velocity = Vector3.zero
+                        ovenMain.RotVelocity = Vector3.zero
+                        task.wait()
+
+                        -- 7만 좌표로 즉시 텔레포트 복귀
+                        ovenMain.CFrame = CFrame.new(returnPos)
+                        ovenMain.Velocity = Vector3.zero
+                        ovenMain.RotVelocity = Vector3.zero
+                        task.wait()
                     end
                 else
                     task.wait()
                 end
             else
+                -- 타겟이 없을 때 기본 7만 좌표에 대기
                 if ovenMain and ovenMain.Parent then
-                    MoveOven(Vector3.new(0, ReturnYCoordinate, 0))
+                    ovenMain.CFrame = CFrame.new(0, ReturnYCoordinate, 0)
+                    ovenMain.Velocity = Vector3.zero
+                    ovenMain.RotVelocity = Vector3.zero
                 end
                 task.wait()
             end
