@@ -51,7 +51,7 @@ local function PlotBarrierDelete()
         rs.MenuToys.SpawnToyRemoteFunction:InvokeServer("FoodBread", hrp.CFrame, Vector3.new(0,0,0))
     end)
 
-    task.wait(0.1)
+    task.wait(0.15)
 
     local foodBread = inv:FindFirstChild("FoodBread")
     if not foodBread then _G.PBDrun = false return end
