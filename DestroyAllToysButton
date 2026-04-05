@@ -16,6 +16,10 @@ if targetParent:FindFirstChild("DestroyAllButton") then
     targetParent.DestroyAllButton:Destroy()
 end
 
+if targetParent:FindFirstChild("DestroyAllButtonBottom") then
+    targetParent.DestroyAllButtonBottom:Destroy()
+end
+
 local DestroyAllButton = Instance.new("TextButton")
 DestroyAllButton.Name = "DestroyAllButton"
 DestroyAllButton.Size = UDim2.new(0, 150, 0, 35)
@@ -33,6 +37,38 @@ UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = DestroyAllButton
 
 DestroyAllButton.MouseButton1Click:Connect(function()
+    local folderName = LocalPlayer.Name .. "SpawnedInToys"
+    local toyFolder = workspace:FindFirstChild(folderName)
+
+    if toyFolder then
+        local toys = toyFolder:GetChildren()
+        
+        for _, toy in ipairs(toys) do
+            local args = {
+                [1] = toy
+            }
+            ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+        end
+    end
+end)
+
+local DestroyAllButtonBottom = Instance.new("TextButton")
+DestroyAllButtonBottom.Name = "DestroyAllButtonBottom"
+DestroyAllButtonBottom.Size = UDim2.new(0, 150, 0, 35)
+DestroyAllButtonBottom.Position = UDim2.new(0.5, 0, 1, -60)
+DestroyAllButtonBottom.AnchorPoint = Vector2.new(0.5, 1)
+DestroyAllButtonBottom.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+DestroyAllButtonBottom.TextColor3 = Color3.fromRGB(255, 255, 255)
+DestroyAllButtonBottom.Text = "Destroy All Toys"
+DestroyAllButtonBottom.Font = Enum.Font.SourceSansBold
+DestroyAllButtonBottom.TextSize = 16
+DestroyAllButtonBottom.Parent = targetParent
+
+local UICornerBottom = Instance.new("UICorner")
+UICornerBottom.CornerRadius = UDim.new(0, 8)
+UICornerBottom.Parent = DestroyAllButtonBottom
+
+DestroyAllButtonBottom.MouseButton1Click:Connect(function()
     local folderName = LocalPlayer.Name .. "SpawnedInToys"
     local toyFolder = workspace:FindFirstChild(folderName)
 
