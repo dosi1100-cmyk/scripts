@@ -12,11 +12,6 @@ end
 
 local targetParent = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MenuGui"):WaitForChild("Menu"):WaitForChild("TabContents"):WaitForChild("ToyDestroy")
 
--- TitleText 텍스트를 "Hello"로 변경
-local titleText = targetParent:WaitForChild("Title"):WaitForChild("TitleText")
-titleText.Text = "Sex on the Beach"
-
--- 기존 버튼들 정리
 if targetParent:FindFirstChild("DestroyAllButton") then
     targetParent.DestroyAllButton:Destroy()
 end
@@ -33,7 +28,6 @@ if targetParent:FindFirstChild("DestroyAllButtonRight") then
     targetParent.DestroyAllButtonRight:Destroy()
 end
 
--- 중앙 상단 버튼
 local DestroyAllButton = Instance.new("TextButton")
 DestroyAllButton.Name = "DestroyAllButton"
 DestroyAllButton.Size = UDim2.new(0, 150, 0, 35)
@@ -58,15 +52,16 @@ DestroyAllButton.MouseButton1Click:Connect(function()
         local toys = toyFolder:GetChildren()
         
         for _, toy in ipairs(toys) do
-            local args = {
-                [1] = toy
-            }
-            ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            if toy.Name ~= "ToyNumber" then
+                local args = {
+                    [1] = toy
+                }
+                ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            end
         end
     end
 end)
 
--- 중앙 하단 버튼
 local DestroyAllButtonBottom = Instance.new("TextButton")
 DestroyAllButtonBottom.Name = "DestroyAllButtonBottom"
 DestroyAllButtonBottom.Size = UDim2.new(0, 150, 0, 35)
@@ -91,15 +86,16 @@ DestroyAllButtonBottom.MouseButton1Click:Connect(function()
         local toys = toyFolder:GetChildren()
         
         for _, toy in ipairs(toys) do
-            local args = {
-                [1] = toy
-            }
-            ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            if toy.Name ~= "ToyNumber" then
+                local args = {
+                    [1] = toy
+                }
+                ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            end
         end
     end
 end)
 
--- 중앙 좌측 버튼 (세로)
 local DestroyAllButtonLeft = Instance.new("TextButton")
 DestroyAllButtonLeft.Name = "DestroyAllButtonLeft"
 DestroyAllButtonLeft.Size = UDim2.new(0, 150, 0, 35)
@@ -125,15 +121,16 @@ DestroyAllButtonLeft.MouseButton1Click:Connect(function()
         local toys = toyFolder:GetChildren()
         
         for _, toy in ipairs(toys) do
-            local args = {
-                [1] = toy
-            }
-            ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            if toy.Name ~= "ToyNumber" then
+                local args = {
+                    [1] = toy
+                }
+                ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            end
         end
     end
 end)
 
--- 중앙 우측 버튼 (세로)
 local DestroyAllButtonRight = Instance.new("TextButton")
 DestroyAllButtonRight.Name = "DestroyAllButtonRight"
 DestroyAllButtonRight.Size = UDim2.new(0, 150, 0, 35)
@@ -159,10 +156,12 @@ DestroyAllButtonRight.MouseButton1Click:Connect(function()
         local toys = toyFolder:GetChildren()
         
         for _, toy in ipairs(toys) do
-            local args = {
-                [1] = toy
-            }
-            ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            if toy.Name ~= "ToyNumber" then
+                local args = {
+                    [1] = toy
+                }
+                ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("DestroyToy"):FireServer(unpack(args))
+            end
         end
     end
 end)
