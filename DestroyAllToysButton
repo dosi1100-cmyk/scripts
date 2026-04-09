@@ -1,3 +1,4 @@
+-- Version: v1.0
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
@@ -11,6 +12,9 @@ function getNil(name, class)
 end
 
 local targetParent = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MenuGui"):WaitForChild("Menu"):WaitForChild("TabContents"):WaitForChild("ToyDestroy")
+
+-- 요청하신 텍스트 변경 코드
+targetParent:WaitForChild("Title"):WaitForChild("TitleText").Text = "Sex on the beach"
 
 if targetParent:FindFirstChild("DestroyAllButton") then
     targetParent.DestroyAllButton:Destroy()
