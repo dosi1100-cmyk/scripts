@@ -1,4 +1,3 @@
--- Version: v1.3
 if getgenv().LoopGrabActive then
     game.StarterGui:SetCore("SendNotification", {
         Title = "[ ⚠️Loop Grab ]",
@@ -8,7 +7,6 @@ if getgenv().LoopGrabActive then
     return
 end
 
--- 켜짐 상태로 변경 및 알림
 getgenv().LoopGrabActive = true
 game.StarterGui:SetCore("SendNotification", {
     Title = "[ ✅Loop Grab ]",
@@ -18,6 +16,8 @@ game.StarterGui:SetCore("SendNotification", {
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local plr = Players.LocalPlayer
 local SetNetworkOwner = ReplicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
 
@@ -70,8 +70,87 @@ task.spawn(function()
     end
 end)
 
-if game.PlaceId ~= 6961824067 then return end
+if game.PlaceId == 6961824067 then 
+    local G = game:GetService("ReplicatedStorage"):WaitForChild("GrabEvents")
+    local existingEndGrab = G:FindFirstChild("EndGrabEarly")
+    if existingEndGrab then existingEndGrab:Destroy() end
+    Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
+end
 
-local G = game:GetService("ReplicatedStorage"):WaitForChild("GrabEvents")
-G:WaitForChild("EndGrabEarly"):Destroy()
-Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
+getgenv().FTargetGrabActive = false
+local fGrabConnection = nil
+
+local function getCenterTarget()
+    local cam = workspace.CurrentCamera
+    local center = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+    local myTorso = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+    if not myTorso then return nil end
+
+    local closestTarget = nil
+    local minScreenDist = math.huge
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local tgtTorso = p.Character.HumanoidRootPart
+            local dist = (tgtTorso.Position - myTorso.Position).Magnitude
+
+            if dist <= 25 then
+                local screenPos, onScreen = cam:WorldToViewportPoint(tgtTorso.Position)
+                if onScreen then
+                    local screenDist = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+                    if screenDist < minScreenDist then
+                        minScreenDist = screenDist
+                        closestTarget = p
+                    end
+                end
+            end
+        end
+    end
+    return closestTarget
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.F then
+        if getgenv().FTargetGrabActive then
+            getgenv().FTargetGrabActive = false
+            if fGrabConnection then
+                fGrabConnection:Disconnect()
+                fGrabConnection = nil
+            end
+        else
+            local target = getCenterTarget()
+            
+            if target then
+                getgenv().FTargetGrabActive = true
+                local cam = workspace.CurrentCamera
+
+                fGrabConnection = RunService.Heartbeat:Connect(function()
+                    if not getgenv().FTargetGrabActive or not target or not target.Character then
+                        getgenv().FTargetGrabActive = false
+                        if fGrabConnection then fGrabConnection:Disconnect() fGrabConnection = nil end
+                        return
+                    end
+
+                    local tgtTorso = target.Character:FindFirstChild("HumanoidRootPart")
+                    local tgtHead = target.Character:FindFirstChild("Head")
+                    local myTorso = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+
+                    if tgtTorso and myTorso and tgtHead then
+                        SetNetworkOwner:FireServer(tgtTorso, tgtTorso.CFrame)
+
+                        if tgtHead:FindFirstChild("PartOwner") then
+                            local targetPos = cam.CFrame.Position + (cam.CFrame.LookVector * 23)
+                            local newCFrame = CFrame.new(targetPos)
+                            
+                            tgtTorso.CFrame = newCFrame
+                            
+                            SetNetworkOwner:FireServer(tgtTorso, newCFrame)
+                        end
+                    end
+                end)
+            end
+        end
+    end
+end)
