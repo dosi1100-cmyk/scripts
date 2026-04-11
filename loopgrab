@@ -126,7 +126,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 getgenv().FTargetGrabActive = true
                 local cam = workspace.CurrentCamera
 
-                fGrabConnection = RunService.Heartbeat:Connect(function()
+                fGrabConnection = RunService.RenderStepped:Connect(function()
                     if not getgenv().FTargetGrabActive or not target or not target.Character then
                         getgenv().FTargetGrabActive = false
                         if fGrabConnection then fGrabConnection:Disconnect() fGrabConnection = nil end
@@ -143,6 +143,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                         if tgtHead:FindFirstChild("PartOwner") then
                             local targetPos = cam.CFrame.Position + (cam.CFrame.LookVector * 23)
                             local newCFrame = CFrame.new(targetPos)
+                            
+                            tgtTorso.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                            tgtTorso.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
                             
                             tgtTorso.CFrame = newCFrame
                             
