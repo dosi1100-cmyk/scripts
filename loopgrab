@@ -78,7 +78,7 @@ if game.PlaceId == 6961824067 then
 end
 
 getgenv().FTargetGrabActive = false
-local fGrabConnection = nil
+getgenv().fGrabConnection = nil
 
 local function getCenterTarget()
     local cam = workspace.CurrentCamera
@@ -109,27 +109,36 @@ local function getCenterTarget()
     return closestTarget
 end
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
+if getgenv().LoopGrabInputConnection then
+    getgenv().LoopGrabInputConnection:Disconnect()
+    getgenv().LoopGrabInputConnection = nil
+end
+
+getgenv().LoopGrabInputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    
+    if not getgenv().LoopGrabActive then return end
+
     if input.KeyCode == Enum.KeyCode.F then
         if getgenv().FTargetGrabActive then
             getgenv().FTargetGrabActive = false
-            if fGrabConnection then
-                fGrabConnection:Disconnect()
-                fGrabConnection = nil
+            if getgenv().fGrabConnection then
+                getgenv().fGrabConnection:Disconnect()
+                getgenv().fGrabConnection = nil
             end
         else
             local target = getCenterTarget()
-            
+
             if target then
                 getgenv().FTargetGrabActive = true
                 local cam = workspace.CurrentCamera
 
-                fGrabConnection = RunService.RenderStepped:Connect(function()
+                getgenv().fGrabConnection = RunService.RenderStepped:Connect(function()
                     if not getgenv().FTargetGrabActive or not target or not target.Character then
                         getgenv().FTargetGrabActive = false
-                        if fGrabConnection then fGrabConnection:Disconnect() fGrabConnection = nil end
+                        if getgenv().fGrabConnection then
+                            getgenv().fGrabConnection:Disconnect()
+                            getgenv().fGrabConnection = nil
+                        end
                         return
                     end
 
@@ -143,12 +152,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                         if tgtHead:FindFirstChild("PartOwner") then
                             local targetPos = cam.CFrame.Position + (cam.CFrame.LookVector * 23)
                             local newCFrame = CFrame.new(targetPos)
-                            
+
                             tgtTorso.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
                             tgtTorso.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                            
+
                             tgtTorso.CFrame = newCFrame
-                            
+
                             SetNetworkOwner:FireServer(tgtTorso, newCFrame)
                         end
                     end
