@@ -8,6 +8,8 @@ if getgenv().KickGrabActive then
 end
 
 getgenv().KickGrabActive = true
+getgenv().FKeyAttackActive = false
+
 game.StarterGui:SetCore("SendNotification", {
     Title = "[ ✅Kick Grab ]",
     Text = "Kick Grab이 켜졌습니다.",
@@ -16,7 +18,10 @@ game.StarterGui:SetCore("SendNotification", {
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local plr = Players.LocalPlayer
+local camera = workspace.CurrentCamera
 local GrabEvents = ReplicatedStorage:WaitForChild("GrabEvents")
 local SetNetworkOwner = GrabEvents:WaitForChild("SetNetworkOwner")
 local DestroyGrabLine = GrabEvents:WaitForChild("DestroyGrabLine")
@@ -70,6 +75,117 @@ task.spawn(function()
         end
         task.wait()
     end
+end)
+
+local function getScreenCenterTarget()
+    local screenCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+    local ray = camera:ViewportPointToRay(screenCenter.X, screenCenter.Y)
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    if plr.Character then
+        raycastParams.FilterDescendantsInstances = {plr.Character}
+    end
+
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+    if result and result.Instance then
+        for _, pl in ipairs(Players:GetPlayers()) do
+            if pl ~= plr and pl.Character and result.Instance:IsDescendantOf(pl.Character) then
+                return pl
+            end
+        end
+    end
+    return nil
+end
+
+local fAttackTarget = nil
+local fAttackConnection = nil
+
+local function stopFKeyAttack()
+    getgenv().FKeyAttackActive = false
+    fAttackTarget = nil
+    if fAttackConnection then
+        fAttackConnection:Disconnect()
+        fAttackConnection = nil
+    end
+end
+
+local function startFKeyAttack(targetPlayer)
+    getgenv().FKeyAttackActive = true
+    fAttackTarget = targetPlayer
+
+    fAttackConnection = RunService.RenderStepped:Connect(function()
+        if not getgenv().FKeyAttackActive or not fAttackTarget then
+            stopFKeyAttack()
+            return
+        end
+
+        local myChar = plr.Character
+        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        local tgtChar = fAttackTarget.Character
+        local tgtRoot = tgtChar and tgtChar:FindFirstChild("HumanoidRootPart")
+        local tgtHead = tgtChar and tgtChar:FindFirstChild("Head")
+
+        if not myRoot or not tgtRoot then return end
+
+        local camCF = camera.CFrame
+        local teleportPos = camCF.Position + camCF.LookVector * 23
+        pcall(function()
+            tgtRoot.CFrame = CFrame.new(teleportPos)
+        end)
+
+        pcall(function()
+            SetNetworkOwner:FireServer(tgtRoot, CFrame.lookAt(myRoot.Position, tgtRoot.Position))
+        end)
+
+        if tgtHead then
+            pcall(function()
+                DestroyGrabLine:FireServer(tgtHead)
+            end)
+        end
+    end)
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode ~= Enum.KeyCode.F then return end
+
+    if getgenv().FKeyAttackActive then
+        stopFKeyAttack()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "[ ❌Kick Grab ]",
+            Text = "F키 공격이 중지되었습니다.",
+            Duration = 2
+        })
+        return
+    end
+
+    local target = getScreenCenterTarget()
+    if not target then return end
+
+    local myChar = plr.Character
+    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    local tgtChar = target.Character
+    local tgtRoot = tgtChar and tgtChar:FindFirstChild("HumanoidRootPart")
+
+    if not myRoot or not tgtRoot then return end
+
+    local distance = (myRoot.Position - tgtRoot.Position).Magnitude
+    if distance > 25 then
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "[ ⚠️Kick Grab ]",
+            Text = "타겟이 너무 멀리 있습니다! (25Studs 초과)",
+            Duration = 2
+        })
+        return
+    end
+
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "[ ✅Kick Grab ]",
+        Text = target.Name .. " 에게 F키 공격 시작!",
+        Duration = 2
+    })
+    startFKeyAttack(target)
 end)
 
 if game.PlaceId ~= 6961824067 then return end
