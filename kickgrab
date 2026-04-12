@@ -116,7 +116,6 @@ local function startFKeyAttack(targetPlayer)
     getgenv().FKeyAttackActive = true
     fAttackTarget = targetPlayer
     
-    -- 프레임마다 타겟 파트를 번갈아가기 위한 변수 설정
     local isHrpFrame = true 
 
     fAttackConnection = RunService.RenderStepped:Connect(function()
@@ -138,7 +137,6 @@ local function startFKeyAttack(targetPlayer)
             tgtRoot.CFrame = CFrame.new(teleportPos)
         end)
 
-        -- 현재 프레임에 공격할 타겟 파트 결정 (HRP와 Torso 번갈아가며 선택)
         local currentTargetPart
         if isHrpFrame then
             currentTargetPart = tgtRoot
@@ -146,22 +144,18 @@ local function startFKeyAttack(targetPlayer)
             currentTargetPart = tgtChar:FindFirstChild("Torso") or tgtChar:FindFirstChild("UpperTorso") or tgtRoot
         end
         
-        -- 다음 프레임을 위해 상태 반전
         isHrpFrame = not isHrpFrame
 
         if currentTargetPart then
-            -- 1. 그랩 생성
             pcall(function()
                 local grabCFrame = CFrame.new(-0.090301513671875, 0.4190945625305176, 0.4999980926513672, 0.39632707834243774, 0, -0.9181094169616699, -1.0944717132588266e-07, 1, -4.7245869438938826e-08, 0.9181094169616699, 5.960464477539063e-08, 0.39632707834243774)
                 CreateGrabLine:FireServer(currentTargetPart, grabCFrame)
             end)
 
-            -- 2. 셋오너
             pcall(function()
                 SetNetworkOwner:FireServer(currentTargetPart, CFrame.lookAt(myRoot.Position, currentTargetPart.Position))
             end)
 
-            -- 3. 그랩 파괴
             pcall(function()
                 DestroyGrabLine:FireServer(currentTargetPart)
             end)
