@@ -1,0 +1,157 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local repStorage = game:GetService("ReplicatedStorage")
+local setNetworkOwner = repStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
+
+local plotCFrames = {
+    [1] = CFrame.new(-532.0158081054688, -5.591518878936768, 95.6521987915039, -0.865190327167511, -0.2596333920955658, 0.42899444699287415, 0, 0.8555188179016113, 0.51777184009552, -0.50144362449646, 0.4479711949825287, -0.7401865720748901),
+    [2] = CFrame.new(-493.17340087890625, -5.653066158294678, -164.51084899902344, 0.30851930379867554, -0.37542006373405457, 0.8739997744560242, 0, 0.9188216924667358, 0.3946729600429535, -0.9512181282043457, -0.12176422774791718, 0.2834742069244385),
+    [3] = CFrame.new(256.76751708984375, -5.380659103393555, 466.65625, -0.8961027264595032, 0.30602845549583435, -0.321475625038147, 0, 0.7242941856384277, 0.6894912123680115, 0.44384679198265076, 0.6178549528121948, -0.6490419507026672),
+    [4] = CFrame.new(513.7680053710938, 85.13038635253906, -345.8212585449219, 0.4605468213558197, 0.5212469696998596, -0.7184693813323975, 0, 0.8094194531440735, 0.5872309803962708, 0.887635350227356, -0.27044737339019775, 0.3727755844593048),
+    [5] = CFrame.new(559.8180541992188, 125.14988708496094, -76.7403335571289, 0.02620585821568966, 0.622352659702301, -0.7822982668876648, 0, 0.7825670838356018, 0.6225664615631104, 0.999656617641449, -0.01631488837301731, 0.02050784043967724)
+}
+
+local ownedPlot = nil
+
+for i = 1, 5 do
+    local plot = workspace.Plots:FindFirstChild("Plot" .. i)
+    if plot then
+        local ownersFolder = plot:FindFirstChild("PlotSign") and plot.PlotSign:FindFirstChild("ThisPlotsOwners")
+        if ownersFolder then
+            for _, child in pairs(ownersFolder:GetChildren()) do
+                local success, val = pcall(function() return tostring(child.Value) end)
+                if (success and string.find(val, player.Name)) or string.find(child.Name, player.Name) then
+                    ownedPlot = i
+                    break
+                end
+            end
+        end
+    end
+    if ownedPlot then break end
+end
+
+if ownedPlot then
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "[ ⚠️ Plot 이미 획득 함 ]",
+        Text = "이미 Plot" .. ownedPlot .. "를 소유하고 있습니다.",
+        Duration = 5
+    })
+else
+    local targetPlotNum = nil
+    for i = 1, 5 do
+        local plot = workspace.Plots:FindFirstChild("Plot" .. i)
+        if plot then
+            local ownersFolder = plot:FindFirstChild("PlotSign") and plot.PlotSign:FindFirstChild("ThisPlotsOwners")
+            if ownersFolder then
+                local isMine = false
+                local isEmpty = true
+                
+                for _, child in pairs(ownersFolder:GetChildren()) do
+                    local success, val = pcall(function() return tostring(child.Value) end)
+                    if success then
+                        if string.find(val, player.Name) then
+                            isMine = true
+                            isEmpty = false
+                        elseif val ~= "" and val ~= "nil" then
+                            isEmpty = false
+                        end
+                    else
+                        if string.find(child.Name, player.Name) then
+                            isMine = true
+                            isEmpty = false
+                        end
+                    end
+                end
+                
+                if not isMine then
+                    if isEmpty then
+                        targetPlotNum = i
+                        break
+                    elseif targetPlotNum == nil then
+                        targetPlotNum = i
+                    end
+                end
+            end
+        end
+    end
+
+    if targetPlotNum then
+        local originalPosition = rootPart.CFrame
+        local targetCFrame = plotCFrames[targetPlotNum]
+        local grabPart = workspace.Plots["Plot" .. targetPlotNum].PlotSign.Sign.Plus.PlusGrabPart
+        
+        local maxAttempts = 3
+        local acquired = false
+        
+        for attempt = 1, maxAttempts do
+            rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            rootPart.CFrame = targetCFrame
+            
+            task.wait(0.07)
+            
+            local timeElapsed = 0
+            local duration = 0.3
+            
+            while timeElapsed < duration do
+                setNetworkOwner:FireServer(grabPart, targetCFrame)
+                timeElapsed = timeElapsed + task.wait(0.03)
+            end
+            
+            rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            rootPart.CFrame = originalPosition
+            
+            local checkTimeout = 0.5
+            local checkTimeElapsed = 0
+            
+            while checkTimeElapsed < checkTimeout do
+                local plotToCheck = workspace.Plots:FindFirstChild("Plot" .. targetPlotNum)
+                if plotToCheck then
+                    local ownersFolder = plotToCheck:FindFirstChild("PlotSign") and plotToCheck.PlotSign:FindFirstChild("ThisPlotsOwners")
+                    if ownersFolder then
+                        for _, child in pairs(ownersFolder:GetChildren()) do
+                            local success, val = pcall(function() return tostring(child.Value) end)
+                            if (success and string.find(val, player.Name)) or string.find(child.Name, player.Name) then
+                                acquired = true
+                                break
+                            end
+                        end
+                    end
+                end
+                
+                if acquired then
+                    break
+                end
+                
+                local dt = task.wait(0.03)
+                checkTimeElapsed = checkTimeElapsed + dt
+            end
+            
+            if acquired then
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "[ 🟢 Plot 획득 ]",
+                    Text = "Plot" .. targetPlotNum .. " 획득 성공",
+                    Duration = 5
+                })
+                break
+            end
+        end
+        
+        if not acquired then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "[ 🔴 Plot 획득 ]",
+                Text = "획득 실패",
+                Duration = 5
+            })
+        end
+        
+    else
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "[ ⚠️ Plot 획득 ]",
+            Text = "비어있는 Plot이 없습니다.",
+            Duration = 5
+        })
+    end
+end
