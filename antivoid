@@ -1,3 +1,5 @@
+-- Version: v1.0
+
 if _G.AntiVoidT == nil then
     _G.AntiVoidT = false
 end
@@ -7,6 +9,26 @@ _G.AntiVoidT = not _G.AntiVoidT
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+local function ManagePlatform(enable)
+    -- 기존에 생성된 발판이 있다면 제거하여 중복 생성 방지
+    local existingPlatform = workspace:FindFirstChild("AntiVoidPlatform")
+    if existingPlatform then
+        existingPlatform:Destroy()
+    end
+    
+    if enable then
+        -- 1차 방어용 투명 발판 생성
+        local platform = Instance.new("Part")
+        platform.Name = "AntiVoidPlatform"
+        platform.Size = Vector3.new(50000, 1, 50000) -- 맵 전체를 덮을 만큼 넓게 설정
+        platform.Position = Vector3.new(0, -280, 0) -- -330에서 50Studs 위
+        platform.Anchored = true
+        platform.Transparency = 1 -- 투명색
+        platform.CanCollide = true
+        platform.Parent = workspace
+    end
+end
+
 if _G.AntiVoidT then
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "AntiVoid",
@@ -15,6 +37,7 @@ if _G.AntiVoidT then
     })
     
     workspace.FallenPartsDestroyHeight = -50000
+    ManagePlatform(true) -- 발판 생성
     
     task.spawn(function()
         while _G.AntiVoidT do
@@ -44,4 +67,5 @@ else
         Text = "Anti Void가 꺼졌습니다.",
         Duration = 2
     })
+    ManagePlatform(false) -- 기능 종료 시 발판 제거
 end
