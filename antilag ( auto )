@@ -106,5 +106,3 @@ pcall(function()
         Duration = 5
     })
 end)
-
-print("자동 안티 렉 실행 됨")
