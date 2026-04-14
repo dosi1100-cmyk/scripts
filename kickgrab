@@ -133,7 +133,7 @@ local function startFKeyAttack(targetPlayer)
         if not myRoot or not tgtRoot then return end
 
         local camCF = camera.CFrame
-        local teleportPos = camCF.Position + camCF.LookVector * 21
+        local teleportPos = camCF.Position + camCF.LookVector * 20
         pcall(function()
             tgtRoot.CFrame = CFrame.new(teleportPos)
         end)
