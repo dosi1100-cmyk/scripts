@@ -1,0 +1,81 @@
+local Players = game:GetService("Players")
+local TARGET_PLACE_ID = 6961824067
+
+if game.PlaceId ~= TARGET_PLACE_ID then
+	return
+end
+
+local TARGET_HIP_HEIGHT = 2
+local CHECK_INTERVAL = 0.15
+
+local R6_LEG_PARTS = {
+	["Left Leg"] = true,
+	["Right Leg"] = true,
+}
+
+local R15_LEG_PARTS = {
+	["LeftUpperLeg"] = true,
+	["LeftLowerLeg"] = true,
+	["LeftFoot"] = true,
+	["RightUpperLeg"] = true,
+	["RightLowerLeg"] = true,
+	["RightFoot"] = true,
+}
+
+local function getLegPartSet(humanoid)
+	if humanoid.RigType == Enum.HumanoidRigType.R6 then
+		return R6_LEG_PARTS
+	else
+		return R15_LEG_PARTS
+	end
+end
+
+local function allLegsGone(character, humanoid)
+	local legParts = getLegPartSet(humanoid)
+
+	for partName in pairs(legParts) do
+		local part = character:FindFirstChild(partName)
+		if part and part:IsA("BasePart") then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function watchCharacter(character)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if not humanoid then
+		return
+	end
+
+	task.spawn(function()
+		while character.Parent do
+			if humanoid.Parent and humanoid.Health > 0 then
+				if allLegsGone(character, humanoid) then
+					if humanoid.HipHeight ~= TARGET_HIP_HEIGHT then
+						humanoid.HipHeight = TARGET_HIP_HEIGHT
+					end
+				end
+			end
+
+			task.wait(CHECK_INTERVAL)
+		end
+	end)
+end
+
+local function onPlayerAdded(player)
+	player.CharacterAdded:Connect(function(character)
+		watchCharacter(character)
+	end)
+
+	if player.Character then
+		watchCharacter(player.Character)
+	end
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+for _, player in ipairs(Players:GetPlayers()) do
+	onPlayerAdded(player)
+end
