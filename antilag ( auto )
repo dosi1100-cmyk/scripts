@@ -73,7 +73,7 @@ local function AntiLagF()
         end
 
         if not fireCount[fromPlr] then
-            fireCount[fromPlr] = {count = 0, lastCallTime = 0}
+            fireCount[fromPlr] = {count = 0, lastCallTime = 0, isFlagged = false}
         end
 
         local currentTime = os.clock()
@@ -83,52 +83,69 @@ local function AntiLagF()
         fireCount[fromPlr].count += 1
 
         if fireCount[fromPlr].count >= AntiLagV or timeSinceLastCall <= RapidFireLimit then
-            if not isLagging then
-                isLagging = true
-                suspectPlayer = fromPlr
+            if not fireCount[fromPlr].isFlagged then
+                fireCount[fromPlr].isFlagged = true
 
-                pcall(function()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "[ 렉 감지 ]",
-                        Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]\n(사유: 비정상 호출)",
-                        Duration = 3
-                    })
-                end)
+                if not isLagging then
+                    isLagging = true
+                    suspectPlayer = fromPlr
 
-                if charBeamMove then charBeamMove.Enabled = false end
+                    pcall(function()
+                        StarterGui:SetCore("SendNotification", {
+                            Title = "[ 렉 감지 ]",
+                            Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                            Duration = 3
+                        })
+                    end)
 
-                task.spawn(function()
-                    local suspect = suspectPlayer
+                    if charBeamMove then charBeamMove.Enabled = false end
 
-                    while suspect and suspect.Parent == Players do
-                        local data = fireCount[suspect]
-                        if not data then break end
-                        
-                        if os.clock() - data.lastCallTime >= CooldownTime then
-                            break
+                    task.spawn(function()
+                        local suspect = suspectPlayer
+
+                        while suspect and suspect.Parent == Players do
+                            local data = fireCount[suspect]
+                            if not data then break end
+                            
+                            if os.clock() - data.lastCallTime >= CooldownTime then
+                                data.isFlagged = false
+                                break
+                            end
+
+                            task.wait(0.5)
                         end
 
-                        task.wait(0.5)
-                    end
+                        isLagging = false
+                        suspectPlayer = nil
 
-                    isLagging = false
-                    suspectPlayer = nil
+                        if charBeamMove then charBeamMove.Enabled = true end
+                    end)
 
-                    if charBeamMove then charBeamMove.Enabled = true end
-                end)
-                
-                fireCount[fromPlr].count = -9999
+                else
+                    pcall(function()
+                        StarterGui:SetCore("SendNotification", {
+                            Title = "[ 추가 렉 감지 ]",
+                            Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                            Duration = 3
+                        })
+                    end)
 
-            elseif suspectPlayer ~= fromPlr then
-                pcall(function()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "[ 추가 렉 감지 ]",
-                        Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                        Duration = 3
-                    })
-                end)
-                
-                fireCount[fromPlr].count = -9999
+                    task.spawn(function()
+                        local suspect = fromPlr
+
+                        while suspect and suspect.Parent == Players do
+                            local data = fireCount[suspect]
+                            if not data then break end
+                            
+                            if os.clock() - data.lastCallTime >= CooldownTime then
+                                data.isFlagged = false
+                                break
+                            end
+
+                            task.wait(0.5)
+                        end
+                    end)
+                end
             end
         end
     end)
