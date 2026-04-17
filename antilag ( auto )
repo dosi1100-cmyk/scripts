@@ -21,6 +21,7 @@ local Pline = CreateGrabLine.OnClientEvent
 local antiLagEnabled = true
 local antiLagMode = true
 local AntiLagV = 25
+local RapidFireLimit = 0.03
 
 local fireCount = {}
 local isLagging = false
@@ -51,58 +52,6 @@ local function AntiLagF()
             if not antiLagEnabled or not antiLagMode then continue end
 
             for fromPlr, data in pairs(fireCount) do
-                if data.count >= AntiLagV then
-                    if not isLagging then
-                        isLagging = true
-                        suspectPlayer = fromPlr
-
-                        pcall(function()
-                            StarterGui:SetCore("SendNotification", {
-                                Title = "[ 렉 감지 ]",
-                                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                                Duration = 3
-                            })
-                        end)
-
-                        if charBeamMove then charBeamMove.Enabled = false end
-
-                        task.spawn(function()
-                            local suspect = suspectPlayer
-                            local initialChar = suspect and suspect.Character
-
-                            while suspect and suspect.Parent == Players do
-                                local char = suspect.Character
-                                
-                                if char ~= initialChar or not char then
-                                    break
-                                end
-                                
-                                local hum = char:FindFirstChild("Humanoid")
-                                if hum and hum.Health <= 0 then
-                                    break
-                                end
-
-                                task.wait(0.2)
-                            end
-
-                            isLagging = false
-                            suspectPlayer = nil
-
-                            if charBeamMove then charBeamMove.Enabled = true end
-                        end)
-
-                    elseif suspectPlayer ~= fromPlr then
-                        pcall(function()
-                            StarterGui:SetCore("SendNotification", {
-                                Title = "[ 추가 렉 감지 ]",
-                                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                                Duration = 3
-                            })
-                        end)
-                    end
-                end
-
-                -- 1초마다 카운트 초기화
                 data.count = 0 
             end
         end
@@ -123,10 +72,69 @@ local function AntiLagF()
         end
 
         if not fireCount[fromPlr] then
-            fireCount[fromPlr] = {count = 0}
+            fireCount[fromPlr] = {count = 0, lastCallTime = 0}
         end
 
+        local currentTime = os.clock()
+        local timeSinceLastCall = currentTime - fireCount[fromPlr].lastCallTime
+        
+        fireCount[fromPlr].lastCallTime = currentTime
         fireCount[fromPlr].count += 1
+
+        if fireCount[fromPlr].count >= AntiLagV or timeSinceLastCall <= RapidFireLimit then
+            if not isLagging then
+                isLagging = true
+                suspectPlayer = fromPlr
+
+                pcall(function()
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "[ 렉 감지 ]",
+                        Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]\n(사유: 비정상 호출)",
+                        Duration = 3
+                    })
+                end)
+
+                if charBeamMove then charBeamMove.Enabled = false end
+
+                task.spawn(function()
+                    local suspect = suspectPlayer
+                    local initialChar = suspect and suspect.Character
+
+                    while suspect and suspect.Parent == Players do
+                        local char = suspect.Character
+                        
+                        if char ~= initialChar or not char then
+                            break
+                        end
+                        
+                        local hum = char:FindFirstChild("Humanoid")
+                        if hum and hum.Health <= 0 then
+                            break
+                        end
+
+                        task.wait(0.2)
+                    end
+
+                    isLagging = false
+                    suspectPlayer = nil
+
+                    if charBeamMove then charBeamMove.Enabled = true end
+                end)
+                
+                fireCount[fromPlr].count = -9999
+
+            elseif suspectPlayer ~= fromPlr then
+                pcall(function()
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "[ 추가 렉 감지 ]",
+                        Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                        Duration = 3
+                    })
+                end)
+                
+                fireCount[fromPlr].count = -9999
+            end
+        end
     end)
 end
 
