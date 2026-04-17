@@ -22,6 +22,7 @@ local antiLagEnabled = true
 local antiLagMode = true
 local AntiLagV = 25
 local RapidFireLimit = 0.03
+local CooldownTime = 2
 
 local fireCount = {}
 local isLagging = false
@@ -98,21 +99,16 @@ local function AntiLagF()
 
                 task.spawn(function()
                     local suspect = suspectPlayer
-                    local initialChar = suspect and suspect.Character
 
                     while suspect and suspect.Parent == Players do
-                        local char = suspect.Character
+                        local data = fireCount[suspect]
+                        if not data then break end
                         
-                        if char ~= initialChar or not char then
-                            break
-                        end
-                        
-                        local hum = char:FindFirstChild("Humanoid")
-                        if hum and hum.Health <= 0 then
+                        if os.clock() - data.lastCallTime >= CooldownTime then
                             break
                         end
 
-                        task.wait(0.2)
+                        task.wait(0.5)
                     end
 
                     isLagging = false
