@@ -20,9 +20,10 @@ local Pline = CreateGrabLine.OnClientEvent
 
 local antiLagEnabled = true
 local antiLagMode = true
-local AntiLagV = 20
+local AntiLagV = 15
 
 local fireCount = {}
+local isLagging = false
 local connection = nil
 
 local function AntiLagF()
@@ -42,6 +43,46 @@ local function AntiLagF()
         if charBeamMove then charBeamMove.Enabled = false end
     end
 
+    -- 1초마다 전체 fireCount를 체크해서 15 이상이면 비활성화, 미만이면 활성화
+    task.spawn(function()
+        while true do
+            task.wait(1)
+
+            if not antiLagEnabled or not antiLagMode then continue end
+
+            local anyLagging = false
+
+            for fromPlr, data in pairs(fireCount) do
+                if data.count >= AntiLagV then
+                    anyLagging = true
+
+                    if not isLagging then
+                        isLagging = true
+
+                        pcall(function()
+                            StarterGui:SetCore("SendNotification", {
+                                Title = "[ 렉 감지 ]",
+                                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                                Duration = 3
+                            })
+                        end)
+
+                        if charBeamMove then charBeamMove.Enabled = false end
+                    end
+                end
+
+                -- 매 초마다 카운트 리셋
+                data.count = 0
+            end
+
+            -- 모든 플레이어가 15 미만이면 다시 활성화
+            if not anyLagging and isLagging then
+                isLagging = false
+                if charBeamMove then charBeamMove.Enabled = true end
+            end
+        end
+    end)
+
     connection = Pline:Connect(function(fromPlr, ...)
         if typeof(fromPlr) ~= "Instance" or not fromPlr:IsA("Player") then return end
         if fromPlr == plr then return end
@@ -56,44 +97,11 @@ local function AntiLagF()
             return
         end
 
-        local now = os.clock()
-
-        if not fireCount[fromPlr] then 
-            fireCount[fromPlr] = {count = 0, start = now} 
+        if not fireCount[fromPlr] then
+            fireCount[fromPlr] = {count = 0}
         end
 
-        local data = fireCount[fromPlr]
-
-        if now - data.start > 1 then
-            data.count = 0
-            data.start = now
-        end
-
-        data.count += 1
-
-        if data.count >= AntiLagV and not data.isDecreasing then
-            data.isDecreasing = true
-            
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {
-                    Title = "[ 렉 감지 ]",
-                    Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                    Duration = 3
-                })
-            end)
-            
-            if charBeamMove then charBeamMove.Enabled = false end
-
-            task.spawn(function()
-                while data.count > 0 do
-                    task.wait(0.1)
-                    data.count -= 1
-                end
-
-                if charBeamMove then charBeamMove.Enabled = true end
-                fireCount[fromPlr] = nil
-            end)
-        end
+        fireCount[fromPlr].count += 1
     end)
 end
 
