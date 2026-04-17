@@ -62,7 +62,7 @@ local function AntiLagF()
 
                         pcall(function()
                             StarterGui:SetCore("SendNotification", {
-                                Title = "[ 렉 감지 - 주범 지목 ]",
+                                Title = "[ 렉 감지 ]",
                                 Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
                                 Duration = 3
                             })
