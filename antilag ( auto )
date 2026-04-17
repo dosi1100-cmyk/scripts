@@ -24,6 +24,7 @@ local AntiLagV = 23
 
 local fireCount = {}
 local isLagging = false
+local suspectPlayer = nil
 local connection = nil
 
 local function AntiLagF()
@@ -43,7 +44,6 @@ local function AntiLagF()
         if charBeamMove then charBeamMove.Enabled = false end
     end
 
-    -- 1초마다 전체 fireCount를 체크해서 15 이상이면 비활성화, 미만이면 활성화
     task.spawn(function()
         while true do
             task.wait(1)
@@ -58,27 +58,61 @@ local function AntiLagF()
 
                     if not isLagging then
                         isLagging = true
+                        suspectPlayer = fromPlr
 
                         pcall(function()
                             StarterGui:SetCore("SendNotification", {
-                                Title = "[ 렉 감지 ]",
+                                Title = "[ 렉 감지 - 주범 지목 ]",
                                 Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
                                 Duration = 3
                             })
                         end)
 
                         if charBeamMove then charBeamMove.Enabled = false end
+
+                    elseif suspectPlayer ~= fromPlr then
+                        pcall(function()
+                            StarterGui:SetCore("SendNotification", {
+                                Title = "[ 추가 렉 감지 ]",
+                                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                                Duration = 3
+                            })
+                        end)
                     end
                 end
 
-                -- 매 초마다 카운트 리셋
                 data.count = 0
             end
 
-            -- 모든 플레이어가 15 미만이면 다시 활성화
             if not anyLagging and isLagging then
-                isLagging = false
-                if charBeamMove then charBeamMove.Enabled = true end
+                local suspect = suspectPlayer
+
+                task.spawn(function()
+                    local interval = 0.1
+                    local totalTime = 1.5
+                    local elapsed = 0
+                    local spiked = false
+
+                    while elapsed < totalTime do
+                        task.wait(interval)
+                        elapsed += interval
+
+                        local suspectData = suspect and fireCount[suspect]
+                        local suspectCount = suspectData and suspectData.count or 0
+
+                        if suspectCount >= AntiLagV then
+                            spiked = true
+                            break
+                        end
+                    end
+
+                    if not spiked then
+                        isLagging = false
+                        suspectPlayer = nil
+
+                        if charBeamMove then charBeamMove.Enabled = true end
+                    end
+                end)
             end
         end
     end)
