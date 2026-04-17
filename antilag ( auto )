@@ -50,12 +50,8 @@ local function AntiLagF()
 
             if not antiLagEnabled or not antiLagMode then continue end
 
-            local anyLagging = false
-
             for fromPlr, data in pairs(fireCount) do
                 if data.count >= AntiLagV then
-                    anyLagging = true
-
                     if not isLagging then
                         isLagging = true
                         suspectPlayer = fromPlr
@@ -70,6 +66,31 @@ local function AntiLagF()
 
                         if charBeamMove then charBeamMove.Enabled = false end
 
+                        task.spawn(function()
+                            local suspect = suspectPlayer
+                            local initialChar = suspect and suspect.Character
+
+                            while suspect and suspect.Parent == Players do
+                                local char = suspect.Character
+                                
+                                if char ~= initialChar or not char then
+                                    break
+                                end
+                                
+                                local hum = char:FindFirstChild("Humanoid")
+                                if hum and hum.Health <= 0 then
+                                    break
+                                end
+
+                                task.wait(0.2)
+                            end
+
+                            isLagging = false
+                            suspectPlayer = nil
+
+                            if charBeamMove then charBeamMove.Enabled = true end
+                        end)
+
                     elseif suspectPlayer ~= fromPlr then
                         pcall(function()
                             StarterGui:SetCore("SendNotification", {
@@ -81,38 +102,8 @@ local function AntiLagF()
                     end
                 end
 
-                data.count = 0
-            end
-
-            if not anyLagging and isLagging then
-                local suspect = suspectPlayer
-
-                task.spawn(function()
-                    local interval = 0.1
-                    local totalTime = 1.5
-                    local elapsed = 0
-                    local spiked = false
-
-                    while elapsed < totalTime do
-                        task.wait(interval)
-                        elapsed += interval
-
-                        local suspectData = suspect and fireCount[suspect]
-                        local suspectCount = suspectData and suspectData.count or 0
-
-                        if suspectCount >= AntiLagV then
-                            spiked = true
-                            break
-                        end
-                    end
-
-                    if not spiked then
-                        isLagging = false
-                        suspectPlayer = nil
-
-                        if charBeamMove then charBeamMove.Enabled = true end
-                    end
-                end)
+                -- 1초마다 카운트 초기화
+                data.count = 0 
             end
         end
     end)
