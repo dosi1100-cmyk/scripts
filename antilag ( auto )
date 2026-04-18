@@ -30,6 +30,7 @@ local isLagging = false
 local isFpsLow = false
 local suspectPlayer = nil
 local connection = nil
+local globalFrame = 0
 
 local charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
 
@@ -57,6 +58,7 @@ task.spawn(function()
     local frames = 0
     RunService.RenderStepped:Connect(function()
         frames += 1
+        globalFrame += 1
     end)
 
     while true do
@@ -105,17 +107,29 @@ local function AntiLagF()
         if not antiLagEnabled or not antiLagMode then return end
 
         if not fireCount[fromPlr] then
-            fireCount[fromPlr] = {count = 0, lastCallTime = 0, isFlagged = false}
+            fireCount[fromPlr] = {count = 0, lastCallTime = 0, isFlagged = false, lastFrame = 0, frameBurst = 0}
+        end
+
+        local data = fireCount[fromPlr]
+
+        if data.lastFrame == globalFrame then
+            data.frameBurst += 1
+            if data.frameBurst > 5 then
+                return 
+            end
+        else
+            data.lastFrame = globalFrame
+            data.frameBurst = 1
         end
 
         local currentTime = os.clock()
         
-        fireCount[fromPlr].lastCallTime = currentTime
-        fireCount[fromPlr].count += 1
+        data.lastCallTime = currentTime
+        data.count += 1
 
-        if fireCount[fromPlr].count >= AntiLagV then
-            if not fireCount[fromPlr].isFlagged then
-                fireCount[fromPlr].isFlagged = true
+        if data.count >= AntiLagV then
+            if not data.isFlagged then
+                data.isFlagged = true
 
                 if not isLagging then
                     isLagging = true
@@ -135,11 +149,11 @@ local function AntiLagF()
                         local suspect = suspectPlayer
 
                         while suspect and suspect.Parent == Players do
-                            local data = fireCount[suspect]
-                            if not data then break end
+                            local sData = fireCount[suspect]
+                            if not sData then break end
                             
-                            if os.clock() - data.lastCallTime >= CooldownTime then
-                                data.isFlagged = false
+                            if os.clock() - sData.lastCallTime >= CooldownTime then
+                                sData.isFlagged = false
                                 break
                             end
 
@@ -164,11 +178,11 @@ local function AntiLagF()
                         local suspect = fromPlr
 
                         while suspect and suspect.Parent == Players do
-                            local data = fireCount[suspect]
-                            if not data then break end
+                            local sData = fireCount[suspect]
+                            if not sData then break end
                             
-                            if os.clock() - data.lastCallTime >= CooldownTime then
-                                data.isFlagged = false
+                            if os.clock() - sData.lastCallTime >= CooldownTime then
+                                sData.isFlagged = false
                                 break
                             end
 
