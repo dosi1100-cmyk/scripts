@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
 
 local plr = Players.LocalPlayer
 
@@ -20,14 +21,62 @@ local Pline = CreateGrabLine.OnClientEvent
 
 local antiLagEnabled = true
 local antiLagMode = true
-local AntiLagV = 27
-local RapidFireLimit = 0.025
+local AntiLagV = 30
 local CooldownTime = 2
+local MinFPS = 30
 
 local fireCount = {}
 local isLagging = false
+local isFpsLow = false
 local suspectPlayer = nil
 local connection = nil
+
+local charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
+
+local function UpdateCharBeamState()
+    if not charBeamMove then return end
+    
+    if not antiLagEnabled then
+        charBeamMove.Enabled = true
+        return
+    end
+
+    if not antiLagMode then
+        charBeamMove.Enabled = false
+        return
+    end
+
+    if isLagging or isFpsLow then
+        charBeamMove.Enabled = false
+    else
+        charBeamMove.Enabled = true
+    end
+end
+
+task.spawn(function()
+    local frames = 0
+    RunService.RenderStepped:Connect(function()
+        frames += 1
+    end)
+
+    while true do
+        task.wait(1)
+        local currentFPS = frames
+        frames = 0
+        
+        if currentFPS < MinFPS then
+            if not isFpsLow then
+                isFpsLow = true
+                UpdateCharBeamState()
+            end
+        else
+            if isFpsLow then
+                isFpsLow = false
+                UpdateCharBeamState()
+            end
+        end
+    end
+end)
 
 local function AntiLagF()
     if connection then
@@ -35,16 +84,7 @@ local function AntiLagF()
         connection = nil
     end
 
-    local charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
-
-    if not antiLagEnabled then
-        if charBeamMove then charBeamMove.Enabled = true end
-        return
-    end
-
-    if antiLagEnabled and not antiLagMode then
-        if charBeamMove then charBeamMove.Enabled = false end
-    end
+    UpdateCharBeamState()
 
     task.spawn(function()
         while true do
@@ -62,33 +102,26 @@ local function AntiLagF()
         if typeof(fromPlr) ~= "Instance" or not fromPlr:IsA("Player") then return end
         if fromPlr == plr then return end
 
-        if not antiLagEnabled then
-            if charBeamMove then charBeamMove.Enabled = true end
-            return
-        end
-
-        if not antiLagMode then
-            if charBeamMove then charBeamMove.Enabled = false end
-            return
-        end
+        if not antiLagEnabled or not antiLagMode then return end
 
         if not fireCount[fromPlr] then
             fireCount[fromPlr] = {count = 0, lastCallTime = 0, isFlagged = false}
         end
 
         local currentTime = os.clock()
-        local timeSinceLastCall = currentTime - fireCount[fromPlr].lastCallTime
         
         fireCount[fromPlr].lastCallTime = currentTime
         fireCount[fromPlr].count += 1
 
-        if fireCount[fromPlr].count >= AntiLagV or timeSinceLastCall <= RapidFireLimit then
+        if fireCount[fromPlr].count >= AntiLagV then
             if not fireCount[fromPlr].isFlagged then
                 fireCount[fromPlr].isFlagged = true
 
                 if not isLagging then
                     isLagging = true
                     suspectPlayer = fromPlr
+                    
+                    UpdateCharBeamState()
 
                     pcall(function()
                         StarterGui:SetCore("SendNotification", {
@@ -97,8 +130,6 @@ local function AntiLagF()
                             Duration = 3
                         })
                     end)
-
-                    if charBeamMove then charBeamMove.Enabled = false end
 
                     task.spawn(function()
                         local suspect = suspectPlayer
@@ -117,8 +148,7 @@ local function AntiLagF()
 
                         isLagging = false
                         suspectPlayer = nil
-
-                        if charBeamMove then charBeamMove.Enabled = true end
+                        UpdateCharBeamState()
                     end)
 
                 else
@@ -156,7 +186,7 @@ AntiLagF()
 pcall(function()
     StarterGui:SetCore("SendNotification", {
         Title = "시스템",
-        Text = "자동 안티 렉 작동 시작",
+        Text = "안티 렉 실행됨",
         Duration = 5
     })
 end)
