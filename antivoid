@@ -19,10 +19,10 @@ end
 
 local platform = Instance.new("Part")
 platform.Name = "AntiVoidPlatform"
-platform.Size = Vector3.new(2048, 3, 2048)
+platform.Size = Vector3.new(2048, 5, 2048)
 platform.Position = Vector3.new(0, -280, 0)
 platform.Anchored = true
-platform.Transparency = 1
+platform.Transparency = 0.8
 platform.CanCollide = true
 platform.Parent = workspace
 
