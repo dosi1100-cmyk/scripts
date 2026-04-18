@@ -124,6 +124,10 @@ local function AntiLagF()
 
         local currentTime = os.clock()
         
+        if data.lastCallTime ~= 0 and (currentTime - data.lastCallTime) <= 0.025 then
+            data.count = AntiLagV
+        end
+
         data.lastCallTime = currentTime
         data.count += 1
 
