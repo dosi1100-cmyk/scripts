@@ -1,3 +1,4 @@
+-- v1.8
 local Players = game:GetService("Players")
 local TARGET_PLACE_ID = 6961824067
 
@@ -53,27 +54,28 @@ local function watchCharacter(character)
 		return
 	end
 
-	local antiExplodeFired = false
-
+	-- 내가 죽었을 때 폭발 무시 끄기 작동
 	humanoid.Died:Connect(function()
 		disableAntiExplode()
 	end)
 
 	task.spawn(function()
-		while character.Parent do
-			if humanoid.Parent and humanoid.Health > 0 then
+		-- 캐릭터와 휴머노이드가 살아있는 동안만 루프 작동
+		while character.Parent and humanoid.Parent and humanoid.Health > 0 do
+			
+			local hasLeftLeg = character:FindFirstChild("Left Leg")
+			local hasRightLeg = character:FindFirstChild("Right Leg")
+			
+			-- 왼쪽 다리와 오른쪽 다리가 모두 없어졌을 때만 실행
+			if not hasLeftLeg and not hasRightLeg then
 				
-				local hasLeftLeg = character:FindFirstChild("Left Leg")
-				local hasRightLeg = character:FindFirstChild("Right Leg")
+				-- HipHeight 2 설정 및 loadstring 1회 실행
+				humanoid.HipHeight = TARGET_HIP_HEIGHT
+				loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
 				
-				if not hasLeftLeg and not hasRightLeg then
-					if not antiExplodeFired then
-						antiExplodeFired = true
-						
-						humanoid.HipHeight = TARGET_HIP_HEIGHT
-						loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
-					end
-				end
+				-- 핵심 수정: 스크립트가 한 번 실행된 후에는 이 감지 루프를 완전히 파괴함
+				-- 죽기 전까지는 절대 두 번 다시 체크하거나 실행하지 않음
+				break
 			end
 
 			task.wait(CHECK_INTERVAL)
