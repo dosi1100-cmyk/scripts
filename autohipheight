@@ -1,3 +1,4 @@
+-- v1.0
 local Players = game:GetService("Players")
 local TARGET_PLACE_ID = 6961824067
 
@@ -8,10 +9,20 @@ end
 local TARGET_HIP_HEIGHT = 2
 local CHECK_INTERVAL = 0.15
 
-local function bothLegsActuallyGone(character)
-	local leftLeg = character:FindFirstChild("Left Leg")
-	local rightLeg = character:FindFirstChild("Right Leg")
-	return (leftLeg == nil) and (rightLeg == nil)
+local R6_LEG_PARTS = {
+	["Left Leg"] = true,
+	["Right Leg"] = true,
+}
+
+local function allLegsGone(character)
+	for partName in pairs(R6_LEG_PARTS) do
+		local part = character:FindFirstChild(partName)
+		if part and part:IsA("BasePart") then
+			return false
+		end
+	end
+
+	return true
 end
 
 local function watchCharacter(character)
@@ -24,26 +35,14 @@ local function watchCharacter(character)
 		return
 	end
 
-	local antiExplodeFired = false
-
-	local leftLegExists = character:FindFirstChild("Left Leg") ~= nil
-	local rightLegExists = character:FindFirstChild("Right Leg") ~= nil
-	local spawnedWithBothLegs = leftLegExists and rightLegExists
-
-	if not spawnedWithBothLegs then
-		return
-	end
-
 	task.spawn(function()
 		while character.Parent do
 			if humanoid.Parent and humanoid.Health > 0 then
-				if bothLegsActuallyGone(character) then
+				if allLegsGone(character) then
 					if humanoid.HipHeight ~= TARGET_HIP_HEIGHT then
 						humanoid.HipHeight = TARGET_HIP_HEIGHT
-					end
-
-					if not antiExplodeFired then
-						antiExplodeFired = true
+						
+						-- HipHeight를 2로 변경한 즉시 스크립트 실행
 						loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
 					end
 				end
