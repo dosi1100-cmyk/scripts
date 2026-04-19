@@ -133,7 +133,7 @@ local function startFKeyAttack(targetPlayer)
         if not myRoot or not tgtRoot then return end
 
         local camCF = camera.CFrame
-        local teleportPos = camCF.Position + camCF.LookVector * 25
+        local teleportPos = camCF.Position + camCF.LookVector * 20
         pcall(function()
             tgtRoot.CFrame = CFrame.new(teleportPos)
         end)
@@ -192,10 +192,10 @@ getgenv().FKeyInputConnection = UserInputService.InputBegan:Connect(function(inp
     if not myRoot or not tgtRoot then return end
 
     local distance = (myRoot.Position - tgtRoot.Position).Magnitude
-    if distance > 30 then
+    if distance > 25 then
         game.StarterGui:SetCore("SendNotification", {
             Title = "[ ⚠️Kick Grab ]",
-            Text = "타겟이 너무 멀리 있습니다! (30Studs 초과)",
+            Text = "타겟이 너무 멀리 있습니다! (25Studs 초과)",
             Duration = 2
         })
         return
