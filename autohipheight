@@ -8,29 +8,12 @@ end
 local TARGET_HIP_HEIGHT = 2
 local CHECK_INTERVAL = 0.15
 
-local R6_LEG_PARTS = {
-	["Left Leg"] = true,
-	["Right Leg"] = true,
-}
-
-local function allLegsGone(character)
-	for partName in pairs(R6_LEG_PARTS) do
-		local part = character:FindFirstChild(partName)
-		if part and part:IsA("BasePart") then
-			return false
-		end
-	end
-	return true
-end
-
-local function hasLegs(character)
-	for partName in pairs(R6_LEG_PARTS) do
-		local part = character:FindFirstChild(partName)
-		if part and part:IsA("BasePart") then
-			return true
-		end
-	end
-	return false
+-- 왼쪽/오른쪽 다리 파츠가 캐릭터 하위에서 완전히 없는지 확인
+local function bothLegsActuallyGone(character)
+	local leftLeg = character:FindFirstChild("Left Leg")
+	local rightLeg = character:FindFirstChild("Right Leg")
+	-- 둘 다 nil이어야 진짜 삭제된 것
+	return (leftLeg == nil) and (rightLeg == nil)
 end
 
 local function watchCharacter(character)
@@ -44,15 +27,21 @@ local function watchCharacter(character)
 	end
 
 	local antiExplodeFired = false
-	local hadLegs = hasLegs(character) -- 처음에 다리가 있었는지 확인
+
+	-- 스폰 시 두 다리가 모두 존재하는지 먼저 확인
+	local leftLegExists = character:FindFirstChild("Left Leg") ~= nil
+	local rightLegExists = character:FindFirstChild("Right Leg") ~= nil
+	local spawnedWithBothLegs = leftLegExists and rightLegExists
+
+	if not spawnedWithBothLegs then
+		return -- 처음부터 다리가 없으면 감지 안 함
+	end
 
 	task.spawn(function()
 		while character.Parent do
 			if humanoid.Parent and humanoid.Health > 0 then
-				local legsNowGone = allLegsGone(character)
-
-				-- 다리가 있다가 없어진 상태여야만 실행
-				if hadLegs and legsNowGone then
+				-- 왼쪽, 오른쪽 다리 파츠가 캐릭터에서 완전히 삭제됐는지 확인
+				if bothLegsActuallyGone(character) then
 					if humanoid.HipHeight ~= TARGET_HIP_HEIGHT then
 						humanoid.HipHeight = TARGET_HIP_HEIGHT
 					end
@@ -61,11 +50,6 @@ local function watchCharacter(character)
 						antiExplodeFired = true
 						loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
 					end
-				end
-
-				-- 다리가 있는 상태라면 hadLegs 유지
-				if not legsNowGone then
-					hadLegs = true
 				end
 			end
 
