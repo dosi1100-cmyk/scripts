@@ -7,6 +7,7 @@ end
 
 local TARGET_HIP_HEIGHT = 2
 local CHECK_INTERVAL = 0.15
+local player = Players.LocalPlayer
 
 local function disableAntiExplode()
 	local function Notify(msg)
@@ -76,18 +77,10 @@ local function watchCharacter(character)
 	end)
 end
 
-local function onPlayerAdded(player)
-	player.CharacterAdded:Connect(function(character)
-		watchCharacter(character)
-	end)
+player.CharacterAdded:Connect(function(character)
+	watchCharacter(character)
+end)
 
-	if player.Character then
-		watchCharacter(player.Character)
-	end
-end
-
-Players.PlayerAdded:Connect(onPlayerAdded)
-
-for _, player in ipairs(Players:GetPlayers()) do
-	onPlayerAdded(player)
+if player.Character then
+	watchCharacter(player.Character)
 end
