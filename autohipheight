@@ -8,11 +8,9 @@ end
 local TARGET_HIP_HEIGHT = 2
 local CHECK_INTERVAL = 0.15
 
--- 왼쪽/오른쪽 다리 파츠가 캐릭터 하위에서 완전히 없는지 확인
 local function bothLegsActuallyGone(character)
 	local leftLeg = character:FindFirstChild("Left Leg")
 	local rightLeg = character:FindFirstChild("Right Leg")
-	-- 둘 다 nil이어야 진짜 삭제된 것
 	return (leftLeg == nil) and (rightLeg == nil)
 end
 
@@ -28,19 +26,17 @@ local function watchCharacter(character)
 
 	local antiExplodeFired = false
 
-	-- 스폰 시 두 다리가 모두 존재하는지 먼저 확인
 	local leftLegExists = character:FindFirstChild("Left Leg") ~= nil
 	local rightLegExists = character:FindFirstChild("Right Leg") ~= nil
 	local spawnedWithBothLegs = leftLegExists and rightLegExists
 
 	if not spawnedWithBothLegs then
-		return -- 처음부터 다리가 없으면 감지 안 함
+		return
 	end
 
 	task.spawn(function()
 		while character.Parent do
 			if humanoid.Parent and humanoid.Health > 0 then
-				-- 왼쪽, 오른쪽 다리 파츠가 캐릭터에서 완전히 삭제됐는지 확인
 				if bothLegsActuallyGone(character) then
 					if humanoid.HipHeight ~= TARGET_HIP_HEIGHT then
 						humanoid.HipHeight = TARGET_HIP_HEIGHT
