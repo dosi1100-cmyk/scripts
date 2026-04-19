@@ -23,7 +23,7 @@ local antiLagEnabled = true
 local antiLagMode = true
 local AntiLagV = 25
 local CooldownTime = 2
-local MinFPS = 30
+local MinFPS = 50
 
 local fireCount = {}
 local isLagging = false
