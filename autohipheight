@@ -8,33 +8,6 @@ end
 local TARGET_HIP_HEIGHT = 2
 local CHECK_INTERVAL = 0.15
 
-local R6_LEG_PARTS = {
-	["Left Leg"] = true,
-	["Right Leg"] = true,
-}
-
-local function allLegsGone(character)
-	for partName in pairs(R6_LEG_PARTS) do
-		local part = character:FindFirstChild(partName)
-		if part and part:IsA("BasePart") then
-			return false
-		end
-	end
-
-	return true
-end
-
-local function allLegsPresent(character)
-	for partName in pairs(R6_LEG_PARTS) do
-		local part = character:FindFirstChild(partName)
-		if not (part and part:IsA("BasePart")) then
-			return false
-		end
-	end
-
-	return true
-end
-
 local function disableAntiExplode()
 	local function Notify(msg)
 		game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -73,37 +46,38 @@ local function watchCharacter(character)
 		return
 	end
 
-	local antiExplodeFired = false
+	local leftLeg = character:WaitForChild("Left Leg", 10)
+	local rightLeg = character:WaitForChild("Right Leg", 10)
 
-	local function turnOff()
-		if antiExplodeFired then
-			antiExplodeFired = false
-			disableAntiExplode()
-		end
+	if not leftLeg or not rightLeg then
+		return
 	end
 
+	local antiExplodeFired = false
+
 	humanoid.Died:Connect(function()
-		turnOff()
+		disableAntiExplode()
 	end)
 
 	task.spawn(function()
 		while character.Parent do
 			if humanoid.Parent and humanoid.Health > 0 then
-				if allLegsGone(character) then
-					humanoid.HipHeight = TARGET_HIP_HEIGHT
-
+				
+				local hasLeftLeg = character:FindFirstChild("Left Leg")
+				local hasRightLeg = character:FindFirstChild("Right Leg")
+				
+				if not hasLeftLeg and not hasRightLeg then
 					if not antiExplodeFired then
 						antiExplodeFired = true
+						
+						humanoid.HipHeight = TARGET_HIP_HEIGHT
 						loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
 					end
-				elseif allLegsPresent(character) then
-					turnOff()
 				end
 			end
 
 			task.wait(CHECK_INTERVAL)
 		end
-		turnOff()
 	end)
 end
 
