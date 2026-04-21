@@ -1,14 +1,11 @@
 local Players = game:GetService("Players")
 local TARGET_PLACE_ID = 6961824067
-
 if game.PlaceId ~= TARGET_PLACE_ID then
 	return
 end
-
 local TARGET_HIP_HEIGHT = 2
 local CHECK_INTERVAL = 0.15
 local player = Players.LocalPlayer
-
 local function disableAntiExplode()
 	local function Notify(msg)
 		game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -17,70 +14,64 @@ local function disableAntiExplode()
 			Duration = 3
 		})
 	end
-
 	if not _G.AntiExplosionT then
 		return
 	end
-
 	_G.AntiExplosionT = false
-
 	if _G.AntiExplosionC then
 		_G.AntiExplosionC:Disconnect()
 		_G.AntiExplosionC = nil
 	end
-
 	if _G.AntiExplosionCharConn then
 		_G.AntiExplosionCharConn:Disconnect()
 		_G.AntiExplosionCharConn = nil
 	end
-
 	Notify("기능이 꺼졌습니다.")
 end
-
 local function watchCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid", 10)
 	if not humanoid then
 		return
 	end
-
 	if humanoid.RigType ~= Enum.HumanoidRigType.R6 then
 		return
 	end
-
 	local leftLeg = character:WaitForChild("Left Leg", 10)
 	local rightLeg = character:WaitForChild("Right Leg", 10)
-
 	if not leftLeg or not rightLeg then
 		return
 	end
-
 	humanoid.Died:Connect(function()
 		disableAntiExplode()
 	end)
-
 	task.spawn(function()
 		while character.Parent and humanoid.Parent and humanoid.Health > 0 do
-			
+
 			local hasLeftLeg = character:FindFirstChild("Left Leg")
 			local hasRightLeg = character:FindFirstChild("Right Leg")
-			
+
 			if not hasLeftLeg and not hasRightLeg then
-				
+
 				humanoid.HipHeight = TARGET_HIP_HEIGHT
-				loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
-				
+				task.wait()
+				task.spawn(function()
+					local ok, err = pcall(function()
+						loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
+					end)
+					if not ok then
+						warn("[antiexplode] loadstring 실패: " .. tostring(err))
+					end
+				end)
+
 				break
 			end
-
 			task.wait(CHECK_INTERVAL)
 		end
 	end)
 end
-
 player.CharacterAdded:Connect(function(character)
 	watchCharacter(character)
 end)
-
 if player.Character then
 	watchCharacter(player.Character)
 end
