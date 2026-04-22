@@ -69,6 +69,17 @@ local function watchCharacter(character)
 				humanoid.HipHeight = TARGET_HIP_HEIGHT
 				loadstring(game:HttpGet('https://raw.githubusercontent.com/dosi1100-cmyk/scripts/refs/heads/main/antiexplode'))()
 				
+				humanoid:GetPropertyChangedSignal("HipHeight"):Connect(function()
+					if humanoid.HipHeight ~= TARGET_HIP_HEIGHT then
+						local currentLeft = character:FindFirstChild("Left Leg")
+						local currentRight = character:FindFirstChild("Right Leg")
+						
+						if not currentLeft and not currentRight then
+							humanoid.HipHeight = TARGET_HIP_HEIGHT
+						end
+					end
+				end)
+				
 				break
 			end
 
