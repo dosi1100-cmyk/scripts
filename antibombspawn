@@ -38,17 +38,14 @@ local function InitAntiBomb()
     local interactRemote = ReplicatedStorage:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
 
     local function SpawnOvenAndAcquire()
-        -- 매번 함수가 실행될 때마다 현재 캐릭터와 상태를 확인합니다.
         local Character = LocalPlayer.Character
         local Humanoid = Character and Character:FindFirstChild("Humanoid")
         local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
 
-        -- 캐릭터가 없거나 죽어있으면 중단
         if not Character or not Humanoid or Humanoid.Health <= 0 or not HumanoidRootPart then
             return nil
         end
 
-        -- 스크립트 켤 때가 아닌, 텔레포트하기 직전 위치를 원래 위치로 저장
         local OriginalCFrame = HumanoidRootPart.CFrame
 
         local myToyFolderName = LocalPlayer.Name .. "SpawnedInToys"
@@ -61,7 +58,6 @@ local function InitAntiBomb()
             end
         end
 
-        -- 이동 전 생존 여부를 한 번 더 체크
         if HumanoidRootPart and Humanoid.Health > 0 then
             HumanoidRootPart.CFrame = CFrame.new(SetupCoordinate)
         else
@@ -107,7 +103,6 @@ local function InitAntiBomb()
             end
         end
 
-        -- 소환 및 소유권 획득 작업이 끝나면 직전 위치로 복귀
         if HumanoidRootPart and Humanoid.Health > 0 then
             HumanoidRootPart.CFrame = OriginalCFrame
         end
@@ -153,7 +148,6 @@ local function InitAntiBomb()
             local Character = LocalPlayer.Character
             local Humanoid = Character and Character:FindFirstChild("Humanoid")
             
-            -- 플레이어가 죽었을 경우 텔레포트 및 소환 등 모든 작동을 일시 중지하고 대기
             if not Character or not Humanoid or Humanoid.Health <= 0 then
                 task.wait(1)
                 continue
@@ -165,7 +159,6 @@ local function InitAntiBomb()
                 
                 local retryCount = 0
                 while getgenv().AntiBombRunning and retryCount < 5 do
-                    -- 소환 시도 전 다시 한번 사망 체크
                     local currentCharacter = LocalPlayer.Character
                     local currentHumanoid = currentCharacter and currentCharacter:FindFirstChild("Humanoid")
                     if not currentCharacter or not currentHumanoid or currentHumanoid.Health <= 0 then
@@ -187,7 +180,6 @@ local function InitAntiBomb()
                     break
                 end
                 
-                -- 죽어서 중단된 게 아니라 정말로 소환에 5번 실패한 경우에만 스크립트 종료
                 if (not myOven or not ovenMain) and retryCount >= 5 then
                     game:GetService("StarterGui"):SetCore("SendNotification", {
                         Title = "[ ⚠️안티 폭탄 ]",
@@ -260,13 +252,11 @@ local function InitAntiBomb()
                         local targetPos = targetCFrame.Position
                         local returnPos = Vector3.new(targetPos.X, ReturnYCoordinate, targetPos.Z)
 
-                        -- 타겟 좌표로 즉시 텔레포트
                         ovenMain.CFrame = CFrame.new(targetPos)
                         ovenMain.Velocity = Vector3.zero
                         ovenMain.RotVelocity = Vector3.zero
                         task.wait()
 
-                        -- 7만 좌표로 즉시 텔레포트 복귀
                         ovenMain.CFrame = CFrame.new(returnPos)
                         ovenMain.Velocity = Vector3.zero
                         ovenMain.RotVelocity = Vector3.zero
@@ -276,9 +266,11 @@ local function InitAntiBomb()
                     task.wait()
                 end
             else
-                -- 타겟이 없을 때 기본 7만 좌표에 대기
                 if ovenMain and ovenMain.Parent then
-                    ovenMain.CFrame = CFrame.new(0, ReturnYCoordinate, 0)
+                    local fastTick = tick() * 30
+                    local idleX = math.sin(fastTick) * 150
+                    local idleZ = math.cos(fastTick) * 150
+                    ovenMain.CFrame = CFrame.new(idleX, ReturnYCoordinate, idleZ)
                     ovenMain.Velocity = Vector3.zero
                     ovenMain.RotVelocity = Vector3.zero
                 end
