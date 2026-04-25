@@ -1,0 +1,51 @@
+local player = game:GetService("Players").LocalPlayer
+
+local function enforceTransparency(part)
+    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+        part:GetPropertyChangedSignal("Transparency"):Connect(function()
+            if part.Transparency == 1 then
+                part.Transparency = 0
+            end
+        end)
+        if part.Transparency == 1 then
+            part.Transparency = 0
+        end
+    end
+end
+
+local function setupCharacter(character)
+    for _, obj in pairs(character:GetChildren()) do
+        if obj:IsA("BasePart") then
+            enforceTransparency(obj)
+        elseif obj:IsA("Accessory") then
+            if string.find(string.lower(obj.Name), "hair") then
+                local handle = obj:FindFirstChild("Handle")
+                if handle then
+                    enforceTransparency(handle)
+                end
+            end
+        end
+    end
+
+    character.ChildAdded:Connect(function(obj)
+        task.wait(0.1)
+        if obj:IsA("BasePart") then
+            enforceTransparency(obj)
+        elseif obj:IsA("Accessory") then
+            if string.find(string.lower(obj.Name), "hair") then
+                local handle = obj:WaitForChild("Handle", 3)
+                if handle then
+                    enforceTransparency(handle)
+                end
+            end
+        end
+    end)
+end
+
+if player.Character then
+    setupCharacter(player.Character)
+end
+
+player.CharacterAdded:Connect(function(character)
+    setupCharacter(character)
+end)
