@@ -18,20 +18,15 @@ if _G.RGB_State == nil then
     _G.RGB_Toggle = false
 end
 
--- 켜져 있거나 켜지는 중이면 실행 방지
 if _G.RGB_State == "on" or _G.RGB_State == "starting" then
     Notify("⚠️ Ragdoll Grab", "이미 켜져 있습니다!", 3)
     return
 end
 
--- 꺼져있음 → 켜기
 _G.RGB_Toggle = true
 _G.RGB_State = "starting"
 Notify("✅ Ragdoll Grab", "Ragdoll Grab이 켜졌습니다.", 3)
 
--- ================================================
--- RagdollGrabF 메인 루프
--- ================================================
 local function RagdollGrabF()
     _G.RGB_State = "on"
 
@@ -52,7 +47,6 @@ local function RagdollGrabF()
 
         local desk = inv:FindFirstChild("RB")
 
-        -- RB(팔레트) 없으면 새로 스폰
         if not desk then
             local spawnRemote = rs.MenuToys and rs.MenuToys:FindFirstChild("SpawnToyRemoteFunction")
             if spawnRemote then
@@ -95,7 +89,6 @@ local function RagdollGrabF()
 
         if not desk then continue end
 
-        -- 충돌 비활성화
         pcall(function()
             for _, part in ipairs(desk:GetDescendants()) do
                 if part:IsA("BasePart") then
@@ -118,9 +111,8 @@ local function RagdollGrabF()
             continue
         end
 
-        local targetFound = false
+        local targetHrp = nil
 
-        -- 잡을 대상 탐색
         for _, other in pairs(Players:GetPlayers()) do
             if other ~= plr and other.Character and other.Character:FindFirstChild("Head") then
                 local head = other.Character.Head
@@ -140,39 +132,36 @@ local function RagdollGrabF()
 
                     local otherHrp = other.Character:FindFirstChild("HumanoidRootPart")
                     if otherHrp then
-                        soundPart.CFrame = CFrame.new(0, 9999, 0)
-                        task.wait(0.01)
-                        soundPart.CFrame = otherHrp.CFrame * CFrame.Angles(math.rad(-90), 0, 0)
-                        targetFound = true
+                        targetHrp = otherHrp
                         break
                     end
                 end
             end
         end
 
-        -- Main BodyPosition 처리
-        local main = desk:FindFirstChild("Main")
-        if main then
-            local bp = main:FindFirstChildOfClass("BodyPosition")
+        if not targetHrp then
+            local bp = soundPart:FindFirstChildOfClass("BodyPosition")
+            if bp then bp:Destroy() end
+            soundPart.CFrame = CFrame.new(0, 9999, 0)
+        else
+            soundPart:BreakJoints()
+
+            soundPart.CFrame = CFrame.new(0, 9999, 0)
+            task.wait(0.01)
+            soundPart.CFrame = targetHrp.CFrame * CFrame.Angles(math.rad(-90), 0, 0)
+
+            local bp = soundPart:FindFirstChildOfClass("BodyPosition")
             if not bp then
                 bp = Instance.new("BodyPosition")
                 bp.MaxForce = Vector3.new(999999, 999999, 999999)
                 bp.P = 500000
                 bp.D = 5000
-                bp.Parent = main
+                bp.Parent = soundPart
             end
-
-            if not targetFound then
-                local highPos = Vector3.new(0, 9999, 0)
-                bp.Position = highPos
-                soundPart.CFrame = CFrame.new(highPos)
-            else
-                bp.Position = soundPart.Position
-            end
+            bp.Position = targetHrp.Position
         end
     end
 
-    -- 루프 종료 후 RB 정리
     local deskToRemove = inv:FindFirstChild("RB")
     if deskToRemove then
         local destroyRemote = rs:FindFirstChild("MenuToys") and rs.MenuToys:FindFirstChild("DestroyToy")
@@ -183,9 +172,3 @@ local function RagdollGrabF()
 end
 
 task.spawn(RagdollGrabF)
-
-if game.PlaceId ~= 6961824067 then return end
-
-local G = game:GetService("ReplicatedStorage"):WaitForChild("GrabEvents")
-G:WaitForChild("EndGrabEarly"):Destroy()
-Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
