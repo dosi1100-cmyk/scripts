@@ -1,0 +1,23 @@
+if _G.UniqueInfiniteVoidActive == true then
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "[ ⚠️AntiVoid ]",
+        Text = "이미 켜져있습니다.",
+        Duration = 2
+    })
+    return
+end
+
+_G.UniqueInfiniteVoidActive = true
+
+local existingPlatform = workspace:FindFirstChild("AntiVoidPlatform")
+if existingPlatform then
+    existingPlatform:Destroy()
+end
+
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "[ 🟢AntiVoid ]",
+    Text = "Anti Void가 켜졌습니다.",
+    Duration = 2
+})
+
+workspace.FallenPartsDestroyHeight = 0/0
