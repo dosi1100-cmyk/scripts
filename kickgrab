@@ -116,8 +116,6 @@ local function startFKeyAttack(targetPlayer)
     getgenv().FKeyAttackActive = true
     fAttackTarget = targetPlayer
     
-    local isHrpFrame = true
-
     fAttackConnection = RunService.RenderStepped:Connect(function()
         if not getgenv().FKeyAttackActive or not fAttackTarget then
             stopFKeyAttack()
@@ -128,7 +126,6 @@ local function startFKeyAttack(targetPlayer)
         local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
         local tgtChar = fAttackTarget.Character
         local tgtRoot = tgtChar and tgtChar:FindFirstChild("HumanoidRootPart")
-        local tgtTorso = tgtChar:FindFirstChild("Torso") or tgtChar:FindFirstChild("UpperTorso")
         
         if not myRoot or not tgtRoot then return end
 
@@ -140,30 +137,11 @@ local function startFKeyAttack(targetPlayer)
 
         local grabCFrame = CFrame.new(-0.090301513671875, 0.4190945625305176, 0.4999980926513672, 0.39632707834243774, 0, -0.9181094169616699, -1.0944717132588266e-07, 1, -4.7245869438938826e-08, 0.9181094169616699, 5.960464477539063e-08, 0.39632707834243774)
 
-        if isHrpFrame then
-            pcall(function()
-                CreateGrabLine:FireServer(tgtRoot, grabCFrame)
-                SetNetworkOwner:FireServer(tgtRoot, CFrame.lookAt(myRoot.Position, tgtRoot.Position))
-                DestroyGrabLine:FireServer(tgtRoot)
-            end)
-        else
-            pcall(function()
-                if tgtTorso then
-                    CreateGrabLine:FireServer(tgtTorso, grabCFrame)
-                    SetNetworkOwner:FireServer(tgtTorso, CFrame.lookAt(myRoot.Position, tgtTorso.Position))
-                end
-                
-                CreateGrabLine:FireServer(tgtRoot, grabCFrame)
-                SetNetworkOwner:FireServer(tgtRoot, CFrame.lookAt(myRoot.Position, tgtRoot.Position))
-
-                if tgtTorso then
-                    DestroyGrabLine:FireServer(tgtTorso)
-                end
-                DestroyGrabLine:FireServer(tgtRoot)
-            end)
-        end
-
-        isHrpFrame = not isHrpFrame
+        pcall(function()
+            CreateGrabLine:FireServer(tgtRoot, grabCFrame)
+            SetNetworkOwner:FireServer(tgtRoot, CFrame.lookAt(myRoot.Position, tgtRoot.Position))
+            DestroyGrabLine:FireServer(tgtRoot)
+        end)
     end)
 end
 
