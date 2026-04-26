@@ -122,14 +122,6 @@ local function RagdollGrabF()
                 if (headPartOwner and headPartOwner:IsA("StringValue") and headPartOwner.Value == plr.Name) or
                    (FreeKick and FreeKick:IsA("StringValue")) then
 
-                    local humanoid = other.Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid then
-                        local ragdolled = humanoid:FindFirstChild("Ragdolled")
-                        if ragdolled and ragdolled:IsA("BoolValue") and ragdolled.Value then
-                            continue
-                        end
-                    end
-
                     local otherHrp = other.Character:FindFirstChild("HumanoidRootPart")
                     if otherHrp then
                         targetHrp = otherHrp
