@@ -31,7 +31,7 @@ local function RagdollGrabF()
     _G.RGB_State = "on"
 
     if not _G.RGB_Toggle then
-        local deskToRemove = inv:FindFirstChild("RB")
+        local deskToRemove = inv:FindFirstChild("RagdollGrab")
         if deskToRemove then
             local destroyRemote = rs:FindFirstChild("MenuToys") and rs.MenuToys:FindFirstChild("DestroyToy")
             if destroyRemote then pcall(function() destroyRemote:FireServer(deskToRemove) end) end
@@ -45,7 +45,7 @@ local function RagdollGrabF()
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
 
-        local desk = inv:FindFirstChild("RB")
+        local desk = inv:FindFirstChild("RagdollGrab")
 
         if not desk then
             local spawnRemote = rs.MenuToys and rs.MenuToys:FindFirstChild("SpawnToyRemoteFunction")
@@ -72,7 +72,7 @@ local function RagdollGrabF()
                                     end
                                     local partOwner = soundPart:FindFirstChild("PartOwner")
                                     if partOwner and partOwner.Value == plr.Name then
-                                        item.Name = "RB"
+                                        item.Name = "RagdollGrab"
                                         return
                                     end
                                 end
@@ -83,7 +83,7 @@ local function RagdollGrabF()
                 end)
 
                 task.wait()
-                desk = inv:FindFirstChild("RB")
+                desk = inv:FindFirstChild("RagdollGrab")
             end
         end
 
@@ -154,7 +154,7 @@ local function RagdollGrabF()
         end
     end
 
-    local deskToRemove = inv:FindFirstChild("RB")
+    local deskToRemove = inv:FindFirstChild("RagdollGrab")
     if deskToRemove then
         local destroyRemote = rs:FindFirstChild("MenuToys") and rs.MenuToys:FindFirstChild("DestroyToy")
         if destroyRemote then pcall(function() destroyRemote:FireServer(deskToRemove) end) end
