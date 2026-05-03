@@ -21,7 +21,7 @@ local Pline = CreateGrabLine.OnClientEvent
 
 local antiLagEnabled = true
 local antiLagMode = true
-local AntiLagV = 23
+local AntiLagV = 27
 local CooldownTime = 1
 local MinFPS = 50
 
