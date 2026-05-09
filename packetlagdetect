@@ -23,10 +23,10 @@ local function calculatePacketSize(data)
     return size
 end
 
-local function sendPacketNotification(senderName, mbSize)
+local function sendPacketNotification(formattedName, mbSize)
     StarterGui:SetCore("SendNotification", {
         Title = "[ 패킷렉 감지 ]",
-        Text = senderName .. "님의 이벤트 크기: 대략 " .. mbSize .. "MB",
+        Text = formattedName .. "님의 이벤트 크기: " .. mbSize .. "MB",
         Duration = 3
     })
 end
@@ -38,24 +38,30 @@ local function monitorRemote(remote)
             local totalSize = calculatePacketSize(args)
             
             if totalSize >= 10240 then
-                local senderName = "알 수 없음 (서버)"
+                local senderDisplayName = "알 수 없음"
+                local senderName = "서버"
                 
                 for _, arg in ipairs(args) do
                     if typeof(arg) == "Instance" and arg:IsA("Player") then
+                        senderDisplayName = arg.DisplayName
                         senderName = arg.Name
                         break
                     elseif type(arg) == "string" and Players:FindFirstChild(arg) then
-                        senderName = arg
+                        local plr = Players:FindFirstChild(arg)
+                        senderDisplayName = plr.DisplayName
+                        senderName = plr.Name
                         break
                     end
                 end
+                
+                local formattedName = "[ " .. senderDisplayName .. " ] ( " .. senderName .. " )"
                 
                 if not activeNotifications[senderName] then
                     activeNotifications[senderName] = true
                     
                     local mbSize = string.format("%.3f", totalSize / 1048576)
                     
-                    sendPacketNotification(senderName, mbSize)
+                    sendPacketNotification(formattedName, mbSize)
                     
                     task.delay(3, function()
                         activeNotifications[senderName] = false
