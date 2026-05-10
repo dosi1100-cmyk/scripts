@@ -21,9 +21,12 @@ local Pline = CreateGrabLine.OnClientEvent
 
 local antiLagEnabled = true
 local antiLagMode = true
-local AntiLagV = 25
+local AntiLagV = 27
 local CooldownTime = 1
 local MinFPS = 60
+
+-- 한 프레임에 이 수치 이상 이벤트가 오면 즉시 감지
+local FrameBurstLimit = 3
 
 local fireCount = {}
 local isLagging = false
@@ -32,11 +35,14 @@ local suspectPlayer = nil
 local connection = nil
 local globalFrame = 0
 
+-- 프레임 종료 시 버스트 카운트 초기화용 큐
+local pendingResetFrame = {}
+
 local charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
 
 local function UpdateCharBeamState()
     if not charBeamMove then return end
-    
+
     if not antiLagEnabled then
         charBeamMove.Enabled = true
         return
@@ -54,18 +60,97 @@ local function UpdateCharBeamState()
     end
 end
 
+-- 플래그 처리 로직 분리 (즉시 호출 가능)
+local function FlagPlayer(fromPlr)
+    local data = fireCount[fromPlr]
+    if not data then return end
+    if data.isFlagged then return end
+
+    data.isFlagged = true
+
+    if not isLagging then
+        isLagging = true
+        suspectPlayer = fromPlr
+
+        UpdateCharBeamState()
+
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "[ 렉 감지 ]",
+                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                Duration = 3
+            })
+        end)
+
+        task.spawn(function()
+            local suspect = suspectPlayer
+
+            while suspect and suspect.Parent == Players do
+                local sData = fireCount[suspect]
+                if not sData then break end
+
+                if os.clock() - sData.lastCallTime >= CooldownTime then
+                    sData.isFlagged = false
+                    break
+                end
+
+                task.wait(0.5)
+            end
+
+            isLagging = false
+            suspectPlayer = nil
+            UpdateCharBeamState()
+        end)
+    else
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "[ 추가 렉 감지 ]",
+                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
+                Duration = 3
+            })
+        end)
+
+        task.spawn(function()
+            local suspect = fromPlr
+
+            while suspect and suspect.Parent == Players do
+                local sData = fireCount[suspect]
+                if not sData then break end
+
+                if os.clock() - sData.lastCallTime >= CooldownTime then
+                    sData.isFlagged = false
+                    break
+                end
+
+                task.wait(0.5)
+            end
+        end)
+    end
+end
+
 task.spawn(function()
     local frames = 0
     RunService.RenderStepped:Connect(function()
         frames += 1
         globalFrame += 1
+
+        -- 매 프레임 종료 시점에 버스트 카운트 초기화
+        for plrRef, resetFrame in pairs(pendingResetFrame) do
+            if resetFrame < globalFrame then
+                local data = fireCount[plrRef]
+                if data then
+                    data.frameBurst = 0
+                end
+                pendingResetFrame[plrRef] = nil
+            end
+        end
     end)
 
     while true do
         task.wait(1)
         local currentFPS = frames
         frames = 0
-        
+
         if currentFPS < MinFPS then
             if not isFpsLow then
                 isFpsLow = true
@@ -95,7 +180,7 @@ local function AntiLagF()
             if not antiLagEnabled or not antiLagMode then continue end
 
             for fromPlr, data in pairs(fireCount) do
-                data.count = 0 
+                data.count = 0
             end
         end
     end)
@@ -107,23 +192,34 @@ local function AntiLagF()
         if not antiLagEnabled or not antiLagMode then return end
 
         if not fireCount[fromPlr] then
-            fireCount[fromPlr] = {count = 0, lastCallTime = 0, isFlagged = false, lastFrame = 0, frameBurst = 0}
+            fireCount[fromPlr] = {
+                count = 0,
+                lastCallTime = 0,
+                isFlagged = false,
+                lastFrame = 0,
+                frameBurst = 0
+            }
         end
 
         local data = fireCount[fromPlr]
+        local currentTime = os.clock()
 
+        -- ── 1) 프레임 버스트 감지 (즉시 반응) ──────────────────────────
         if data.lastFrame == globalFrame then
             data.frameBurst += 1
-            if data.frameBurst > 5 then
-                data.count = AntiLagV
+
+            if data.frameBurst >= FrameBurstLimit then
+                -- 임계값 도달 즉시 플래그 (count 누적 기다리지 않음)
+                FlagPlayer(fromPlr)
             end
         else
             data.lastFrame = globalFrame
             data.frameBurst = 1
+            -- 다음 프레임에 자동 초기화 예약
+            pendingResetFrame[fromPlr] = globalFrame
         end
 
-        local currentTime = os.clock()
-        
+        -- ── 2) 호출 간격 감지 (기존 로직) ──────────────────────────────
         if data.lastCallTime ~= 0 and (currentTime - data.lastCallTime) <= 0.025 then
             data.count = AntiLagV
         end
@@ -131,70 +227,9 @@ local function AntiLagF()
         data.lastCallTime = currentTime
         data.count += 1
 
+        -- ── 3) 누적 카운트 감지 (기존 로직) ─────────────────────────────
         if data.count >= AntiLagV then
-            if not data.isFlagged then
-                data.isFlagged = true
-
-                if not isLagging then
-                    isLagging = true
-                    suspectPlayer = fromPlr
-                    
-                    UpdateCharBeamState()
-
-                    pcall(function()
-                        StarterGui:SetCore("SendNotification", {
-                            Title = "[ 렉 감지 ]",
-                            Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                            Duration = 3
-                        })
-                    end)
-
-                    task.spawn(function()
-                        local suspect = suspectPlayer
-
-                        while suspect and suspect.Parent == Players do
-                            local sData = fireCount[suspect]
-                            if not sData then break end
-                            
-                            if os.clock() - sData.lastCallTime >= CooldownTime then
-                                sData.isFlagged = false
-                                break
-                            end
-
-                            task.wait(0.5)
-                        end
-
-                        isLagging = false
-                        suspectPlayer = nil
-                        UpdateCharBeamState()
-                    end)
-
-                else
-                    pcall(function()
-                        StarterGui:SetCore("SendNotification", {
-                            Title = "[ 추가 렉 감지 ]",
-                            Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                            Duration = 3
-                        })
-                    end)
-
-                    task.spawn(function()
-                        local suspect = fromPlr
-
-                        while suspect and suspect.Parent == Players do
-                            local sData = fireCount[suspect]
-                            if not sData then break end
-                            
-                            if os.clock() - sData.lastCallTime >= CooldownTime then
-                                sData.isFlagged = false
-                                break
-                            end
-
-                            task.wait(0.5)
-                        end
-                    end)
-                end
-            end
+            FlagPlayer(fromPlr)
         end
     end)
 end
