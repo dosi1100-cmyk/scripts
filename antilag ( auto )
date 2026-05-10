@@ -115,7 +115,7 @@ local function AntiLagF()
         if data.lastFrame == globalFrame then
             data.frameBurst += 1
             if data.frameBurst > 5 then
-                return 
+                data.count = AntiLagV
             end
         else
             data.lastFrame = globalFrame
