@@ -1,1 +1,43 @@
-return(function(a,b,c,d,e)for f=0,255 do a[b(f,0)]=b(f)end function d(f,g,h,i)if h>255 then h=0 i+=1 if i>255 then g={}i=1 end end g[b(h,i)]=f h+=1 return g,h,i end e=({('6c006f00630061006c00200061003d00670061006d0065003a004700650074005300650072007600690063006500270050006c006100790011017300270000010201040162003d0061002e004c000101030118011a01110120001f0103012000660075006e006300740069006f006e0020006d003601690074006f0072004800520050002800630029002d01040164002c0065003d0063003a00570061003b0146003d014300680069006c00640028002700480075006d0061006e006f006900640052006f006f007400500061007200740027002c00350029002c004b014d014f01510153015501570159015b015d015f0169016b01690066002000640005016e007e016500200074006800650037017b017d012e004d006100730073006c0065008d017f017e015d017400200065002e0053003b0183018501370164008a018c018e01900173003d00660003017300820186017e0164000c010e01500072006f00700011017400790052015c01670065006400990167006e00030127008b018d018f018d0127003a00430036016e0065003301280030013201340136012800290088019e01bf01a10191015c0193016301960198019a01840186018901d301c101a301a5016c00a70196018001e501640029000b010d016401af01b1016701b4016800b601b801ba01bc016c00270099016801c401c601c8017400ca013101330135016e00cf0188019401d901f8019201de01a001e0019b01dd01d2010a02a201a401a601a801e601a901e9011402e60145012f01ff01cd013701a70174007500700029011b0172004201d0017c0163003d003d0062000c02370172000e01750072003701a9012000880163002e00b5017200610033012b01dc01370174008c016b002e007300700061007700020239016e003b013d013f0150006d013702f10139023b02720016027e01360238023a0274001101410064006400b801fa016e00c701c901cb010002ce01e8013f02730041024302450247023a013c013e0140012c00e8011502330266003d0120006300710234028701440269007200730028006100ac016401190123027f022900290064006f0020001e0220022202110128007202e60124018e0272005b025d02ab01c5016002fc0128008c022102840211012900'):gsub('..',function(f)return b(tonumber(f,16))end)})[1]local f,g,h,i,j,k,l=#e,{},0,1,{},1,c(e,1,2)j[k]=a[l]or g[l]k+=1 for m=3,f,2 do local n,o=c(e,m,m+1),a[l]or g[l]local p=a[n]or g[n]if p then j[k]=p k+=1 g,h,i=d(o..c(p,1,1),g,h,i)else local q=o..c(o,1,1)j[k]=q k+=1 g,h,i=d(q,g,h,i)end l=n end return loadstring(table.concat(j))end)({},string.char,string.sub)(...)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function monitorHRP(character)
+    local hrp = character:WaitForChild("HumanoidRootPart", 5)
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    
+    if hrp and humanoid then
+        if hrp.Massless and not humanoid.Sit then
+            hrp.Massless = false
+        end
+        
+        hrp:GetPropertyChangedSignal("Massless"):Connect(function()
+            if hrp.Massless and not humanoid.Sit then
+                hrp.Massless = false
+            end
+        end)
+        
+        humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
+            if not humanoid.Sit and hrp.Massless then
+                hrp.Massless = false
+            end
+        end)
+    end
+end
+
+local function setupPlayer(player)
+    if player == LocalPlayer then return end
+    
+    if player.Character then
+        task.spawn(monitorHRP, player.Character)
+    end
+    
+    player.CharacterAdded:Connect(function(character)
+        task.spawn(monitorHRP, character)
+    end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    setupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
