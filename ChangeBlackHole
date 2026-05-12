@@ -25,7 +25,6 @@ local function watchForDrone(holeObj)
         if c.Name == "Drone" then
             task.defer(function()
                 if c and c.Parent then
-                    print("Drone을 찾았습니다. 삭제 됨.")
                     c:Destroy()
                 end
             end)
@@ -35,7 +34,6 @@ local function watchForDrone(holeObj)
         if c.Name == "Drone" then
             task.defer(function()
                 if c and c.Parent then
-                    print("Drone을 찾았습니다. 삭제 됨.")
                     c:Destroy()
                 end
             end)
@@ -47,7 +45,6 @@ local function applyChanges(child)
     if child.Name == "Drone" then
         task.defer(function()
             if child and child.Parent then
-                print("Drone을 찾았습니다. 삭제 됨.")
                 child:Destroy()
             end
         end)
