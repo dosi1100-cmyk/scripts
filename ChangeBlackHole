@@ -23,19 +23,34 @@ end
 local function watchForDrone(holeObj)
     for _, c in pairs(holeObj:GetDescendants()) do
         if c.Name == "Drone" then
-            c:Destroy()
+            task.defer(function()
+                if c and c.Parent then
+                    print("Drone을 찾았습니다. 삭제 됨.")
+                    c:Destroy()
+                end
+            end)
         end
     end
     holeObj.DescendantAdded:Connect(function(c)
         if c.Name == "Drone" then
-            c:Destroy()
+            task.defer(function()
+                if c and c.Parent then
+                    print("Drone을 찾았습니다. 삭제 됨.")
+                    c:Destroy()
+                end
+            end)
         end
     end)
 end
 
 local function applyChanges(child)
     if child.Name == "Drone" then
-        child:Destroy()
+        task.defer(function()
+            if child and child.Parent then
+                print("Drone을 찾았습니다. 삭제 됨.")
+                child:Destroy()
+            end
+        end)
         return
     end
 
@@ -257,7 +272,6 @@ end
 end
 
 local function handleBlackHoleKick(obj)
-    -- Drone 전담 감시 (task.wait와 무관하게 독립 실행)
     for _, descendant in pairs(obj:GetDescendants()) do
         if descendant.Name == "Hole" and descendant:IsA("BasePart") then
             watchForDrone(descendant)
@@ -269,7 +283,6 @@ local function handleBlackHoleKick(obj)
         end
     end)
 
-    -- 기존 로직
     for _, descendant in pairs(obj:GetDescendants()) do
         applyChanges(descendant)
     end
@@ -287,5 +300,3 @@ workspace.DescendantAdded:Connect(function(descendant)
         handleBlackHoleKick(descendant)
     end
 end)
-
-print("updated")
