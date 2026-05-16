@@ -1,0 +1,104 @@
+local args = {
+    [1] = "Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls B" ..
+        "alls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls Balls" ..
+        "Balls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Ball" ..
+        "s Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Bal" ..
+        "ls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls B" ..
+        "allsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls " ..
+        "Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls" ..
+        " Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Ball" ..
+        "s BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls al" ..
+        "ls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls B" ..
+        "alls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls " ..
+        "Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls" ..
+        " Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBall" ..
+        "s Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Ba" ..
+        "lls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls B" ..
+        "alls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls Balls" ..
+        "Balls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Ball" ..
+        "s Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Bal" ..
+        "ls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls Ba" ..
+        "llsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls B" ..
+        "alls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls" ..
+        " Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Ball" ..
+        "s BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Bal" ..
+        "ls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Ba" ..
+        "lls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls " ..
+        "Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls" ..
+        " alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBall" ..
+        "s Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Ba" ..
+        "lls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls B" ..
+        "allsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsB" ..
+        "alls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls" ..
+        " Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Bal" ..
+        "ls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls Ba" ..
+        "llsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls B" ..
+        "alls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls " ..
+        "Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Ball" ..
+        "s BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls all" ..
+        "s Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Ba" ..
+        "lls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls " ..
+        "Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls" ..
+        "Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls" ..
+        " Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Bal" ..
+        "ls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls B" ..
+        "alls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsB" ..
+        "alls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls" ..
+        " Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Ball" ..
+        "s Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls Ba" ..
+        "llsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Ba" ..
+        "lls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls " ..
+        "Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Ball" ..
+        "s BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBall" ..
+        "s Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Bal" ..
+        "ls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls B" ..
+        "alls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls" ..
+        " alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls" ..
+        " Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Bal" ..
+        "ls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Ba" ..
+        "lls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsB" ..
+        "alls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls " ..
+        "Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Ball" ..
+        "s Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls Ba" ..
+        "llsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Ba" ..
+        "lls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls B" ..
+        "alls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls" ..
+        " BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls all" ..
+        "s Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Bal" ..
+        "ls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls B" ..
+        "alls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls " ..
+        "Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls" ..
+        " Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Ball" ..
+        "s Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Ba" ..
+        "lls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsB" ..
+        "alls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls " ..
+        "Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls" ..
+        " Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls Bal" ..
+        "lsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Ba" ..
+        "lls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls B" ..
+        "alls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls" ..
+        " BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Ball" ..
+        "s Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Bal" ..
+        "ls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Ba" ..
+        "lls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls " ..
+        "alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls" ..
+        " Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Ball" ..
+        "s Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Bal" ..
+        "ls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBa" ..
+        "lls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls " ..
+        "Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls" ..
+        " Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls Bal" ..
+        "lsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Ba" ..
+        "lls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls B" ..
+        "alls BallsBalls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls " ..
+        "BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls" ..
+        " Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBalls Bal" ..
+        "ls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls BallsBalls Balls Balls Ba" ..
+        "lls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls Balls Balls Balls B" ..
+        "alls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Balls Balls BallsBalls " ..
+        "Balls Balls Balls Balls Balls Balls Balls BallsBalls Balls Balls Balls alls Balls Ball" ..
+        "s Balls BallsBalls Balls Balls BallsBalls Balls Balls Balls BallsBalls Balls Balls Bal" ..
+        "ls alls Balls Balls Balls BallsBalls Balls Balls Balls Balls Balls Balls Balls BallsBa" --[[ MAXIMUM STRING SIZE REACHED, CHANGE 'getgenv().SimpleSpyMaxStringSize' TO ADJUST MAXIMUM SIZE ]]
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("GrabEvents"):WaitForChild("ExtendGrabLine"):FireServer(unpack(args))
