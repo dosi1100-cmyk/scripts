@@ -241,15 +241,16 @@ local function InitAntiBomb()
                         if not foundTarget or not foundTarget.Parent then break end
                         if not myOven or not myOven.Parent or not ovenMain or not ovenMain.Parent then break end
 
+                        local currentTargetCFrame = nil
                         if foundTarget.Name == "BombBalloon" or foundTarget.Name == "BalloonModel" then
-                            targetCFrame = foundTarget:GetPivot()
+                            currentTargetCFrame = foundTarget:GetPivot()
                         elseif foundTarget:FindFirstChild("Main") then
-                            targetCFrame = foundTarget.Main.CFrame
+                            currentTargetCFrame = foundTarget.Main.CFrame
                         end
                         
-                        if not targetCFrame then break end
+                        if not currentTargetCFrame then break end
 
-                        local targetPos = targetCFrame.Position
+                        local targetPos = currentTargetCFrame.Position
                         local returnPos = Vector3.new(targetPos.X, ReturnYCoordinate, targetPos.Z)
 
                         ovenMain.CFrame = CFrame.new(targetPos)
@@ -262,8 +263,6 @@ local function InitAntiBomb()
                         ovenMain.RotVelocity = Vector3.zero
                         task.wait()
                     end
-                else
-                    task.wait()
                 end
             else
                 if ovenMain and ovenMain.Parent then
@@ -274,8 +273,9 @@ local function InitAntiBomb()
                     ovenMain.Velocity = Vector3.zero
                     ovenMain.RotVelocity = Vector3.zero
                 end
-                task.wait()
             end
+            
+            task.wait()
         end
         getgenv().AntiBombRunning = false
     end)
