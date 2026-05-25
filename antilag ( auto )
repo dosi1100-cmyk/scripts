@@ -30,6 +30,10 @@ local FrameBurstLimit = 3
 local fireCount = {}
 local isLagging = false
 local isFpsLow = false
+local isEventSpamming = false 
+local globalEventsPerSecond = 0 
+local SafeEventLimit = 10 
+
 local suspectPlayer = nil
 local connection = nil
 local globalFrame = 0
@@ -51,7 +55,7 @@ local function UpdateCharBeamState()
         return
     end
 
-    if isLagging or isFpsLow then
+    if isLagging or isFpsLow or isEventSpamming then
         charBeamMove.Enabled = false
     else
         charBeamMove.Enabled = true
@@ -146,6 +150,15 @@ task.spawn(function()
         task.wait(1)
         local currentFPS = frames
         frames = 0
+        
+        local currentEvents = globalEventsPerSecond
+        globalEventsPerSecond = 0
+
+        if currentEvents >= AntiLagV then
+            isEventSpamming = true
+        elseif currentEvents <= SafeEventLimit then
+            isEventSpamming = false
+        end
 
         if currentFPS < MinFPS then
             if not isFpsLow then
@@ -158,6 +171,8 @@ task.spawn(function()
                 UpdateCharBeamState()
             end
         end
+        
+        UpdateCharBeamState()
     end
 end)
 
@@ -186,6 +201,8 @@ local function AntiLagF()
         if fromPlr == plr then return end
 
         if not antiLagEnabled or not antiLagMode then return end
+        
+        globalEventsPerSecond += 1
 
         if not fireCount[fromPlr] then
             fireCount[fromPlr] = {
