@@ -255,10 +255,12 @@ local function InitAntiBomb()
                         ovenMain.Velocity = Vector3.zero
                         ovenMain.RotVelocity = Vector3.zero
                     else
+                        task.wait()
                         break
                     end
                     task.wait()
                 end
+                task.wait()
             else
                 if ovenMain and ovenMain.Parent then
                     local currentPos = ovenMain.Position
