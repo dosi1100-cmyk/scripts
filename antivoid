@@ -6,50 +6,56 @@ if _G.AntiVoidT == true then
     })
     return
 end
-
 _G.AntiVoidT = true
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local existingPlatform = workspace:FindFirstChild("AntiVoidPlatform")
-if existingPlatform then
-    existingPlatform:Destroy()
+local existingFolder = workspace:FindFirstChild("AntiVoidPlatforms")
+if existingFolder then
+    existingFolder:Destroy()
 end
 
-local platform = Instance.new("Part")
-platform.Name = "AntiVoidPlatform"
-platform.Size = Vector3.new(2048, 5, 2048)
-platform.Position = Vector3.new(0, -280, 0)
-platform.Anchored = true
-platform.Transparency = 0.8
-platform.CanCollide = true
-platform.Parent = workspace
+local folder = Instance.new("Folder")
+folder.Name = "AntiVoidPlatforms"
+folder.Parent = workspace
+
+local partSize = 2048
+local gridCount = 8
+local offset = (gridCount - 1) / 2
+
+for x = 0, gridCount - 1 do
+    for z = 0, gridCount - 1 do
+        local part = Instance.new("Part")
+        part.Name = "AntiVoidPlatform"
+        part.Size = Vector3.new(partSize, 5, partSize)
+        part.Position = Vector3.new(
+            (x - offset) * partSize,
+            -280,
+            (z - offset) * partSize
+        )
+        part.Anchored = true
+        part.Transparency = 0.8
+        part.CanCollide = true
+        part.Parent = folder
+    end
+end
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "[ 🟢AntiVoid ]",
     Text = "Anti Void가 켜졌습니다.",
     Duration = 2
 })
-
 workspace.FallenPartsDestroyHeight = -50000
-
 task.spawn(function()
     while _G.AntiVoidT do
         local char = LocalPlayer.Character
         if char then
             local hrp = char:FindFirstChild("HumanoidRootPart")
             if hrp then
-                if platform and platform.Parent then
-                    platform.Position = Vector3.new(hrp.Position.X, -280, hrp.Position.Z)
-                end
-
                 if hrp.Position.Y < -330 then
                     hrp.CFrame = CFrame.new(0, -2, 0)
-                    
                     hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
                     hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                    
                     hrp.Anchored = true
                     task.wait(0.03)
                     hrp.Anchored = false
