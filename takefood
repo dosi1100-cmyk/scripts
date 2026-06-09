@@ -7,7 +7,7 @@ if not getgenv().AntiHoleItems then
         Duration = 3
     })
     
-    local WhiteListMode = false
+    local WhiteListMode = true
     local Whitelist = {}
     
     task.spawn(function()
