@@ -131,7 +131,7 @@ if not getgenv().AntiHoleItems then
     end)
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "안티 홀드파트",
+        Title = "[ 안티 홀드파트 ]",
         Text = "이미 켜져있음⚠️",
         Duration = 3
     })
