@@ -63,7 +63,7 @@ if not getgenv().AntiHoleItems then
                                 pcall(function()
                                     holdRemote:InvokeServer(item, char)
                                 end)
-                                task.wait(0.03)
+                                task.wait(0.02)
                             end
                             pcall(function()
                                 dropRemote:InvokeServer(item, dropPos, dropVec)
