@@ -53,36 +53,23 @@ if not getgenv().AntiHoleItems then
             if holdRemote and dropRemote then
                 processedItems[item] = true
                 task.spawn(function()
-                    local attempts = 0
-                    local rapidFire = false
                     while item and item.Parent and getgenv().AntiHoleItems do
                         local char = plr.Character
                         if not char then break end
-                        if rapidFire then
-                            local startTime = tick()
-                            while tick() - startTime < 3 and item and item.Parent and getgenv().AntiHoleItems do
-                                pcall(function()
-                                    holdRemote:InvokeServer(item, char)
-                                end)
-                                RunService.Heartbeat:Wait()
-                            end
+                        
+                        pcall(function()
+                            holdRemote:InvokeServer(item, char)
+                        end)
+                        
+                        task.wait(0.1)
+                        
+                        if item and item.Parent then
                             pcall(function()
                                 dropRemote:InvokeServer(item, dropPos, dropVec)
                             end)
-                            task.wait(0.5)
-                        else
-                            attempts = attempts + 1
-                            pcall(function()
-                                holdRemote:InvokeServer(item, char)
-                                dropRemote:InvokeServer(item, dropPos, dropVec)
-                            end)
-                            task.wait(0.5)
-                            if item and item.Parent then
-                                if attempts >= 3 then
-                                    rapidFire = true
-                                end
-                            end
                         end
+                        
+                        task.wait(0.2)
                     end
                     processedItems[item] = nil
                 end)
