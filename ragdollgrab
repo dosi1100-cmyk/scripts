@@ -25,7 +25,7 @@ end
 
 _G.RGB_Toggle = true
 _G.RGB_State = "starting"
-Notify("✅ Ragdoll Grab", "Ragdoll Grab이 켜졌습니다.", 3)
+Notify("✅ Ragdoll Grab v2.5", "Ragdoll Grab이 켜졌습니다.", 3)
 
 local function RagdollGrabF()
     _G.RGB_State = "on"
@@ -40,10 +40,29 @@ local function RagdollGrabF()
         return
     end
 
+    local lastHitbox = nil
+    local originalSize = nil
+    local lostTargetTime = nil
+    local lastDesk = nil
+    local targetPlrObj = nil
+
+    local function restoreLastHitbox()
+        if lastHitbox and lastHitbox.Parent then
+            pcall(function()
+                lastHitbox.Size = originalSize
+            end)
+        end
+        lastHitbox = nil
+        originalSize = nil
+    end
+
     while _G.RGB_Toggle and task.wait() do
         local char = plr.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
+        if not hrp then 
+            if lastHitbox then restoreLastHitbox() end
+            continue 
+        end
 
         local desk = inv:FindFirstChild("RagdollGrab")
 
@@ -89,13 +108,16 @@ local function RagdollGrabF()
 
         if not desk then continue end
 
-        pcall(function()
-            for _, part in ipairs(desk:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
+        if desk ~= lastDesk then
+            lastDesk = desk
+            pcall(function()
+                for _, part in ipairs(desk:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
                 end
-            end
-        end)
+            end)
+        end
 
         local soundPart = desk:FindFirstChild("SoundPart")
         if not soundPart then
@@ -113,19 +135,36 @@ local function RagdollGrabF()
 
         local targetHrp = nil
 
-        for _, other in pairs(Players:GetPlayers()) do
-            if other ~= plr and other.Character and other.Character:FindFirstChild("Head") then
-                local head = other.Character.Head
-                local headPartOwner = head:FindFirstChild("PartOwner")
-                local FreeKick = head:FindFirstChild("OwnerKickRagdoll")
+        if targetPlrObj and targetPlrObj.Parent and targetPlrObj.Character and targetPlrObj.Character:FindFirstChild("Head") then
+            local head = targetPlrObj.Character.Head
+            local headPartOwner = head:FindFirstChild("PartOwner")
+            local FreeKick = head:FindFirstChild("OwnerKickRagdoll")
+            if (headPartOwner and headPartOwner:IsA("StringValue") and headPartOwner.Value == plr.Name) or
+               (FreeKick and FreeKick:IsA("StringValue")) then
+                local otherHrp = targetPlrObj.Character:FindFirstChild("HumanoidRootPart")
+                if otherHrp then
+                    targetHrp = otherHrp
+                end
+            end
+        end
 
-                if (headPartOwner and headPartOwner:IsA("StringValue") and headPartOwner.Value == plr.Name) or
-                   (FreeKick and FreeKick:IsA("StringValue")) then
+        if not targetHrp then
+            targetPlrObj = nil
+            for _, other in pairs(Players:GetPlayers()) do
+                if other ~= plr and other.Character and other.Character:FindFirstChild("Head") then
+                    local head = other.Character.Head
+                    local headPartOwner = head:FindFirstChild("PartOwner")
+                    local FreeKick = head:FindFirstChild("OwnerKickRagdoll")
 
-                    local otherHrp = other.Character:FindFirstChild("HumanoidRootPart")
-                    if otherHrp then
-                        targetHrp = otherHrp
-                        break
+                    if (headPartOwner and headPartOwner:IsA("StringValue") and headPartOwner.Value == plr.Name) or
+                       (FreeKick and FreeKick:IsA("StringValue")) then
+
+                        local otherHrp = other.Character:FindFirstChild("HumanoidRootPart")
+                        if otherHrp then
+                            targetHrp = otherHrp
+                            targetPlrObj = other
+                            break
+                        end
                     end
                 end
             end
@@ -135,24 +174,56 @@ local function RagdollGrabF()
             local bp = soundPart:FindFirstChildOfClass("BodyPosition")
             if bp then bp:Destroy() end
             soundPart.CFrame = CFrame.new(0, 9999, 0)
-        else
-            soundPart:BreakJoints()
-
-            soundPart.CFrame = CFrame.new(0, 9999, 0)
-            task.wait(0.01)
-            soundPart.CFrame = targetHrp.CFrame * CFrame.Angles(math.rad(-90), 0, 0)
-
-            local bp = soundPart:FindFirstChildOfClass("BodyPosition")
-            if not bp then
-                bp = Instance.new("BodyPosition")
-                bp.MaxForce = Vector3.new(999999, 999999, 999999)
-                bp.P = 500000
-                bp.D = 5000
-                bp.Parent = soundPart
+            
+            if lastHitbox then
+                if not lostTargetTime then
+                    lostTargetTime = os.clock()
+                elseif os.clock() - lostTargetTime > 0.5 then
+                    restoreLastHitbox()
+                    lostTargetTime = nil
+                end
             end
-            bp.Position = targetHrp.Position
+        else
+            lostTargetTime = nil
+            
+            soundPart.CFrame = CFrame.new(0, 9999, 0)
+            task.wait()
+
+            if _G.RGB_Toggle and targetHrp and targetHrp.Parent then
+                local targetCF = targetHrp.CFrame
+                local targetPos = targetHrp.Position
+                
+                local hitbox = targetHrp:FindFirstChild("RagdollTouchedHitbox")
+                if hitbox and hitbox:IsA("BasePart") then
+                    if lastHitbox ~= hitbox then
+                        if lastHitbox then restoreLastHitbox() end
+                        lastHitbox = hitbox
+                        originalSize = hitbox.Size
+                        pcall(function()
+                            hitbox.Size = Vector3.new(originalSize.X, 1000, originalSize.Z)
+                        end)
+                    end
+
+                    targetCF = hitbox.CFrame * CFrame.new(0, hitbox.Size.Y / 2, 0)
+                    targetPos = targetCF.Position
+                end
+
+                soundPart.CFrame = targetCF * CFrame.Angles(math.rad(-90), 0, 0)
+
+                local bp = soundPart:FindFirstChildOfClass("BodyPosition")
+                if not bp then
+                    bp = Instance.new("BodyPosition")
+                    bp.MaxForce = Vector3.new(999999, 999999, 999999)
+                    bp.P = 500000
+                    bp.D = 5000
+                    bp.Parent = soundPart
+                end
+                bp.Position = targetPos
+            end
         end
     end
+
+    if lastHitbox then restoreLastHitbox() end
 
     local deskToRemove = inv:FindFirstChild("RagdollGrab")
     if deskToRemove then
