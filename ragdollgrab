@@ -25,7 +25,7 @@ end
 
 _G.RGB_Toggle = true
 _G.RGB_State = "starting"
-Notify("✅ Ragdoll Grab v2.5", "Ragdoll Grab이 켜졌습니다.", 3)
+Notify("✅ Ragdoll Grab", "Ragdoll Grab이 켜졌습니다.", 3)
 
 local function RagdollGrabF()
     _G.RGB_State = "on"
