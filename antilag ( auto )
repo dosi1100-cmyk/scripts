@@ -21,7 +21,7 @@ local Pline = CreateGrabLine.OnClientEvent
 
 local antiLagEnabled = true
 local antiLagMode = true
-local AntiLagV = 15
+local AntiLagV = 20
 local MinFPS = 60
 
 local FrameBurstLimit = 3
