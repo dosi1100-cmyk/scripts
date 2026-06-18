@@ -22,7 +22,7 @@ local function InitAntiBomb()
     local Workspace = game:GetService("Workspace")
 
     local LocalPlayer = Players.LocalPlayer
-    local SetupCoordinate = Vector3.new(484, 134, 207)
+    local SetupCoordinate = Vector3.new(0, 10000, 10000)
 
     local TargetBombNames = {
         ["BombMissile"] = true,
