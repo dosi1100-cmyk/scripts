@@ -26,6 +26,9 @@ local MinFPS = 60
 
 local FrameBurstLimit = 3
 
+local RapidWindow = 0.2
+local RapidLimit = 10
+
 local fireCount = {}
 local isLagging = false
 local isFpsLow = false
@@ -168,7 +171,9 @@ local function AntiLagF()
                 lastCallTime = 0,
                 isFlagged = false,
                 lastFrame = 0,
-                frameBurst = 0
+                frameBurst = 0,
+                rapidWindowStart = 0,
+                rapidCount = 0
             }
         end
 
@@ -185,6 +190,17 @@ local function AntiLagF()
             data.lastFrame = globalFrame
             data.frameBurst = 1
             pendingResetFrame[fromPlr] = globalFrame
+        end
+
+        if currentTime - data.rapidWindowStart > RapidWindow then
+            data.rapidWindowStart = currentTime
+            data.rapidCount = 1
+        else
+            data.rapidCount += 1
+
+            if data.rapidCount >= RapidLimit then
+                FlagPlayer(fromPlr)
+            end
         end
 
         if data.lastCallTime ~= 0 and (currentTime - data.lastCallTime) <= 0.025 then
