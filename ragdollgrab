@@ -173,7 +173,7 @@ local function RagdollGrabF()
         if not targetHrp then
             local bp = soundPart:FindFirstChildOfClass("BodyPosition")
             if bp then bp:Destroy() end
-            soundPart.CFrame = CFrame.new(0, 9999, 0)
+            soundPart.CFrame = CFrame.new(0, 100000, 0)
             
             if lastHitbox then
                 if not lostTargetTime then
@@ -213,7 +213,7 @@ local function RagdollGrabF()
                 local bp = soundPart:FindFirstChildOfClass("BodyPosition")
                 if not bp then
                     bp = Instance.new("BodyPosition")
-                    bp.MaxForce = Vector3.new(999999, 999999, 999999)
+                    bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                     bp.P = 500000
                     bp.D = 5000
                     bp.Parent = soundPart
