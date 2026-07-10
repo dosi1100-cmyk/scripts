@@ -19,65 +19,68 @@ end
 
 local Pline = CreateGrabLine.OnClientEvent
 
-local antiLagEnabled = true
-local antiLagMode = true
-local AntiLagV = 20
-local MinFPS = 60
+if not getgenv()._AntiLagScript then
+    getgenv()._AntiLagScript = {
+        antiLagEnabled = true,
+        antiLagMode = true,
+        AntiLagV = 20,
+        MinFPS = 60,
+        FrameBurstLimit = 3,
+        RapidWindow = 0.2,
+        RapidLimit = 10,
+        fireCount = {},
+        isLagging = false,
+        isFpsLow = false,
+        suspectPlayer = nil,
+        connection = nil,
+        globalFrame = 0,
+        pendingResetFrame = {},
+        permanentlyDisabled = false,
+        charBeamMove = nil,
+        renderConnection = nil,
+        loopConnection = nil
+    }
+end
 
-local FrameBurstLimit = 3
-
-local RapidWindow = 0.2
-local RapidLimit = 10
-
-local fireCount = {}
-local isLagging = false
-local isFpsLow = false
-local suspectPlayer = nil
-local connection = nil
-local globalFrame = 0
-
-local pendingResetFrame = {}
-
-local permanentlyDisabled = false
-
-local charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
+local AL = getgenv()._AntiLagScript
+AL.charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
 
 local function UpdateCharBeamState()
-    if not charBeamMove then return end
+    if not AL.charBeamMove then return end
 
-    if permanentlyDisabled then
-        charBeamMove.Enabled = false
+    if AL.permanentlyDisabled then
+        AL.charBeamMove.Enabled = false
         return
     end
 
-    if not antiLagEnabled then
-        charBeamMove.Enabled = true
+    if not AL.antiLagEnabled then
+        AL.charBeamMove.Enabled = true
         return
     end
 
-    if not antiLagMode then
-        charBeamMove.Enabled = false
+    if not AL.antiLagMode then
+        AL.charBeamMove.Enabled = false
         return
     end
 
-    if isLagging or isFpsLow then
-        charBeamMove.Enabled = false
-        permanentlyDisabled = true
+    if AL.isLagging or AL.isFpsLow then
+        AL.charBeamMove.Enabled = false
+        AL.permanentlyDisabled = true
     else
-        charBeamMove.Enabled = true
+        AL.charBeamMove.Enabled = true
     end
 end
 
 local function FlagPlayer(fromPlr)
-    local data = fireCount[fromPlr]
+    local data = AL.fireCount[fromPlr]
     if not data then return end
     if data.isFlagged then return end
 
     data.isFlagged = true
 
-    if not isLagging then
-        isLagging = true
-        suspectPlayer = fromPlr
+    if not AL.isLagging then
+        AL.isLagging = true
+        AL.suspectPlayer = fromPlr
 
         UpdateCharBeamState()
 
@@ -99,31 +102,36 @@ local function FlagPlayer(fromPlr)
     end
 end
 
-task.spawn(function()
-    local frames = 0
-    RunService.RenderStepped:Connect(function()
-        frames += 1
-        globalFrame += 1
+AL.renderConnection = RunService.RenderStepped:Connect(function()
+    AL.globalFrame += 1
 
-        for plrRef, resetFrame in pairs(pendingResetFrame) do
-            if resetFrame < globalFrame then
-                local data = fireCount[plrRef]
-                if data then
-                    data.frameBurst = 0
-                end
-                pendingResetFrame[plrRef] = nil
+    for plrRef, resetFrame in pairs(AL.pendingResetFrame) do
+        if resetFrame < AL.globalFrame then
+            local data = AL.fireCount[plrRef]
+            if data then
+                data.frameBurst = 0
             end
+            AL.pendingResetFrame[plrRef] = nil
+        end
+    end
+end)
+
+AL.loopConnection = task.spawn(function()
+    local frames = 0
+    local frameCounter = RunService.RenderStepped:Connect(function()
+        if AL.antiLagEnabled then
+            frames += 1
         end
     end)
 
-    while true do
+    while AL.antiLagEnabled do
         task.wait(1)
         local currentFPS = frames
         frames = 0
         
         local anyLagging = false
 
-        for fromPlr, data in pairs(fireCount) do
+        for fromPlr, data in pairs(AL.fireCount) do
             data.cps = data.count
             data.count = 0
             
@@ -132,48 +140,50 @@ task.spawn(function()
                     data.isFlagged = false
                 else
                     anyLagging = true
-                    suspectPlayer = fromPlr
+                    AL.suspectPlayer = fromPlr
                 end
             end
         end
 
-        isLagging = anyLagging
-        if not isLagging then
-            suspectPlayer = nil
+        AL.isLagging = anyLagging
+        if not AL.isLagging then
+            AL.suspectPlayer = nil
         end
 
-        if currentFPS < MinFPS then
-            if not isFpsLow then
-                isFpsLow = true
+        if currentFPS < AL.MinFPS then
+            if not AL.isFpsLow then
+                AL.isFpsLow = true
                 UpdateCharBeamState()
             end
         else
-            if isFpsLow then
-                isFpsLow = false
+            if AL.isFpsLow then
+                AL.isFpsLow = false
                 UpdateCharBeamState()
             end
         end
         
         UpdateCharBeamState()
     end
+    
+    frameCounter:Disconnect()
 end)
 
 local function AntiLagF()
-    if connection then
-        connection:Disconnect()
-        connection = nil
+    if AL.connection then
+        AL.connection:Disconnect()
+        AL.connection = nil
     end
 
     UpdateCharBeamState()
 
-    connection = Pline:Connect(function(fromPlr, ...)
+    AL.connection = Pline:Connect(function(fromPlr, ...)
         if typeof(fromPlr) ~= "Instance" or not fromPlr:IsA("Player") then return end
         if fromPlr == plr then return end
 
-        if not antiLagEnabled or not antiLagMode then return end
+        if not AL.antiLagEnabled or not AL.antiLagMode then return end
 
-        if not fireCount[fromPlr] then
-            fireCount[fromPlr] = {
+        if not AL.fireCount[fromPlr] then
+            AL.fireCount[fromPlr] = {
                 count = 0,
                 cps = 0,
                 lastCallTime = 0,
@@ -185,40 +195,40 @@ local function AntiLagF()
             }
         end
 
-        local data = fireCount[fromPlr]
+        local data = AL.fireCount[fromPlr]
         local currentTime = os.clock()
 
-        if data.lastFrame == globalFrame then
+        if data.lastFrame == AL.globalFrame then
             data.frameBurst += 1
 
-            if data.frameBurst >= FrameBurstLimit then
+            if data.frameBurst >= AL.FrameBurstLimit then
                 FlagPlayer(fromPlr)
             end
         else
-            data.lastFrame = globalFrame
+            data.lastFrame = AL.globalFrame
             data.frameBurst = 1
-            pendingResetFrame[fromPlr] = globalFrame
+            AL.pendingResetFrame[fromPlr] = AL.globalFrame
         end
 
-        if currentTime - data.rapidWindowStart > RapidWindow then
+        if currentTime - data.rapidWindowStart > AL.RapidWindow then
             data.rapidWindowStart = currentTime
             data.rapidCount = 1
         else
             data.rapidCount += 1
 
-            if data.rapidCount >= RapidLimit then
+            if data.rapidCount >= AL.RapidLimit then
                 FlagPlayer(fromPlr)
             end
         end
 
         if data.lastCallTime ~= 0 and (currentTime - data.lastCallTime) <= 0.025 then
-            data.count = AntiLagV
+            data.count = AL.AntiLagV
         end
 
         data.lastCallTime = currentTime
         data.count += 1
 
-        if data.count >= AntiLagV then
+        if data.count >= AL.AntiLagV then
             FlagPlayer(fromPlr)
         end
     end)
