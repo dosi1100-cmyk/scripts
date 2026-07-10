@@ -35,7 +35,6 @@ if not getgenv()._AntiLagScript then
         connection = nil,
         globalFrame = 0,
         pendingResetFrame = {},
-        permanentlyDisabled = false,
         charBeamMove = nil,
         renderConnection = nil,
         loopConnection = nil
@@ -47,11 +46,6 @@ AL.charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBe
 
 local function UpdateCharBeamState()
     if not AL.charBeamMove then return end
-
-    if AL.permanentlyDisabled then
-        AL.charBeamMove.Enabled = false
-        return
-    end
 
     if not AL.antiLagEnabled then
         AL.charBeamMove.Enabled = true
@@ -65,7 +59,6 @@ local function UpdateCharBeamState()
 
     if AL.isLagging or AL.isFpsLow then
         AL.charBeamMove.Enabled = false
-        AL.permanentlyDisabled = true
     else
         AL.charBeamMove.Enabled = true
     end
