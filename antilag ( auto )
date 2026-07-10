@@ -149,13 +149,8 @@ AL.loopConnection = task.spawn(function()
                 UpdateCharBeamState()
             end
         else
-            if AL.isFpsLow then
-                AL.isFpsLow = false
-                UpdateCharBeamState()
-            end
+            AL.isFpsLow = false
         end
-        
-        UpdateCharBeamState()
     end
     
     frameCounter:Disconnect()
