@@ -42,7 +42,7 @@ UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 UIListLayout.Padding = UDim.new(0, 10)
 
 local layoutOrderCount = 0
-local notificationCount = 0 -- 알림 횟수 카운트용 변수 추가
+local notificationCount = -1
 
 local function CustomNotify(title, content, duration, isFriend)
     duration = duration or 5
