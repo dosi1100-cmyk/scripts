@@ -48,7 +48,7 @@ local function CustomNotify(title, content, duration, isFriend)
     duration = duration or 5
     
     layoutOrderCount = layoutOrderCount - 1
-    notificationCount = notificationCount + 1 -- 알림이 뜰 때마다 1씩 증가
+    notificationCount = notificationCount + 1
     
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 65)
@@ -114,7 +114,6 @@ local function CustomNotify(title, content, duration, isFriend)
     contentLabel.TextWrapped = true
     contentLabel.Parent = frame
     
-    -- 우측 하단 카운트 텍스트 추가
     local countLabel = Instance.new("TextLabel")
     countLabel.Size = UDim2.new(0, 30, 0, 15)
     countLabel.Position = UDim2.new(1, -8, 1, -5)
@@ -135,7 +134,7 @@ local function CustomNotify(title, content, duration, isFriend)
     TweenService:Create(uiStroke, tweenInfo, {Transparency = 0}):Play()
     TweenService:Create(titleLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play()
     TweenService:Create(contentLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play()
-    TweenService:Create(countLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play() -- 카운트 텍스트 등장 애니메이션
+    TweenService:Create(countLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play()
     
     task.delay(duration, function()
         local fadeOutInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
@@ -143,7 +142,7 @@ local function CustomNotify(title, content, duration, isFriend)
         TweenService:Create(uiStroke, fadeOutInfo, {Transparency = 1}):Play()
         TweenService:Create(titleLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
         TweenService:Create(contentLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
-        TweenService:Create(countLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play() -- 카운트 텍스트 퇴장 애니메이션
+        TweenService:Create(countLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
         task.wait(0.5)
         if frame then frame:Destroy() end
     end)
