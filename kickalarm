@@ -1,1 +1,205 @@
-return(function(a,b,c,d,e)for f=0,255 do a[b(f,0)]=b(f)end function d(f,g,h,i)if h>255 then h=0 i+=1 if i>255 then g={}i=1 end end g[b(h,i)]=f h+=1 return g,h,i end e=({('6c006f00630061006c00200061002c0062002c0063002c0064002c0065003d00670061006d0065003a004700650074005300650072007600690063006500270050006c00610079001901730027002c00100112011401160118011a011c011e01520075006e002c011b011d0126012801130115011701190134011e0143006f00720065004700750069003601110138012b013b012e0127005400770065006500320149013501270146012a013a012d01350155007300190149006e007000750056013c012700000102010401660027012c0068002c0069003d0061002e004c00010103012001220119012c0074007200750065002c007b007d002c0027004100650073007400680016011c014b001c016b004e006f0074006900660079005f0050006f005e0170006201700104016a003d0063003a00460069006e0064009b01720081014300680069006c0064002800690029008c0120006a00200082014f01ab013a004400800176016f007900280029004f01640020006301030120006b003d005c01810161006e001d012e006e006500770027005300630040014f01420144016b002e004e0046013d006900be012e005200800116014f0032017000610077006e003d00660003015a012000aa01730079006e0005019d012000e8016e002e00700072008a016500630074005f0067004301ad018301ea01ee01f001f2017400f401f601f801690028006b002900d1015000610040016e0074009801200065006c005a01aa01670016016800f901ae01ea0108020a024f010d02140282014301b7011002e5011a020b020d0263000f02ec01bc0104016c00c0016e00c201c4016500c601c80127004600720046016201d201d401270089018b018d013e010c0261009c0119013802530069007a000e015500440069006d00320032027700280030002c0033003200510230002e0035002c00300029006c002e009001730069008b016f00e10149024b024d02c7014f02510254025902570259025b022e004100c40168003f0190019c010d02560001023f016602c80150026d025c024200610063006b006700f20131016400540036022e02de010b02630079003d003100bb015d021b020c023d006b00bb01950120006d002d022f02c50167022700550049004c00690081014c0022016f005f0127006d00910225023d000401a90253003f0174004f007200640019013d0045006e007500ae02b002b202b40272006e01a5025f01bc02190198022e00770272008b01640141006c00690067006e0012019302b702b902c5021901c8020301ca02cc02ce021c022e0054009101c4020902640064009c0167003d006402a90267027c0231005a022a022000e101300096026401200066003101f5016900620220004300750081016f006d003c028c01b6016f002c0070002c0071002c007200290071003d00710020003f0120003500ec023d006e002d008f02eb0273009a027400c3019c0233023502370273002e0045024702e4024a024c024e0228003100590227033600350029001d037f0281028302a6029d013e010001720033003d0032033f0133002e006600f2016d0052004700420028003300580242032c00340032002b032e002d03820284029d018702c30173008a024f018c028e02ed0149033f01bd021f03650050006900780010023d00ee021d034100f40276000e01760178015503a4027900a602b102b302b502fc01aa021c02ac02ef02bd010d02c101170330024e029e0249003e017200c7017200270074002e007c037e0352006100e102f90221034b02240351023600290081030902ab0273007303040175001603180331029d029f025300b4016b001e01750082036f0033033603a10338033a033c033e03400336008c03510237005a029f035400a3018102c70173001503310057022000af0388025003920253038f029f03900371039203eb027600960378039d025400650078007400a40262001002270076001e034602480222037a024f0226032d006a0269024703d0035e026002f5026302d4038b032c0031003200270338002900d0034a032f0385024e038902bc038d028f02d003c803ca033d006f00e601660020007200fa01af01f203c903740037033403a303330339033b03fb02a8032800320035005802090458025a0222026500f7030b033d003d00ca01cc0169007000740020006f018603650064008003fb012000fd03ca03000435032404a60306043f0325036a020c04e30334000e04110210042204ff03a4030104260405043d0329042c04e40351023b04b801ec01b9012104db02fe03ed03bb038b02f0034104f30317019c03650044045103c401470432049b03f2019d0324040204a5033704070455026d025104d2038e0236004104460062020d02d102a90261040c022e0047008a01680011014200210181024804fe035800d702cd02cf026304b802a90249047204cb027404da024c00650066001904dc0392020d02c20397027700c5031903c9014904cc03ce037700d1032003e502d50325032c00d8035a04320047038e04dd036102e0036502e203e4032703530229008e04ea034c038602ba034e04bd0320008e0449043d0070001104fa031802aa044204230434042504b5042704380440032c042c042f04e501ab04fe0355043604a70339040a042c00bb040a043e04ba01bf04ca034d04ef035403cb044a0453044c04a704ce048f02d00452046f005404b50456043403b804590427035a02d7045d0431000e038e0466047604d202e70468046a046c04a103ca04b30474007a04d8027504b6027704f004f2047c0467047e048004b204490457003602700070001d043d0066031004990483043d008504f00278003d004c014e016e005c0166006f008b032e0034002c0064042e00450061005f026e0067009b0379006c0031025100750086031705f6041a051c0567004a024001f40262022e004f005f01290064003a004300400161000002280073002c0078007a01a4043003a6044f03a8048d02560231007d0029003a007201b601320534053605380575003b057a01cd0446045f034605480521014a05330535056500370565002800760050057b0049045205520343052c004904d8049d0363054f045f03150555054905b70159054d055d05770060056205d4045305510267054b046a055303560234006e055705b70117037300d101b40281050403f202c4019b04b701eb028d020e054f0111051305e7025602580218052805e2021f0521052e002305250596051b05e2022b050102df032e005c014b055a055c0539052c0079003d0580024b033f057c05f0038005220170054c055b054e05aa055105770564058e02b2055805b505a8055f05ab0561054304ba056b0526037a05d204b005bc0547056f05a605720528007405c20576054105d5046605fe036805d304d40553054505cc0581058e031b05d10177004102740050025702a901f8039203b1047300b101b301f2014a054004b901c9049303f102f3029b04f70386018102b0034f014600b7011205fa030003ae049c01e601de016900a00128006100550149052401b7013205f603aa01700082036b043602f501c302b104eb0208031006a2010a028002000272009a019c019e010506a101a301a50127004800b902c3016f006900640052006f008a01900374002700aa010a03b10468005b0070005d0009036f0271023f010305040577011004f0053f04ec016d010a0672004100e0021d0434056202c701f501280089052d056e0028006f00290013051a0613061d064806b40259054c0601024f06f505df03280070005b02970218063a005700e30561047200a201a401a601260628066e002a062c062e067400300626012a033306fb03ea0136066f003906e30130042802ba01f105f105450657051901d9016d006f001b011d054b066e004d06e40550068b055406aa017c0639063f06670316069702020304037200f5032e004a0250035705d30112012c001305a30679017f06e501700064016c005f068a056106e705f1027e00f5037a06f903e2013a004900730035026900b901730057006002680053062e0059015b016400f205f105f802fa02fc028a01fe02280027005b002000f8059502b20100021406ba015d002601cf0627002e00f001dc0627005d00200028004000db062e007100de062900260138000503f20595061003a4018106df0584052e00bb03e001ae065106b701770024061004670020006400f603fe050b030103e601ea0117044102060608063901460673000c06fe061104190612061c06150620041706ad0411061b0614061e069b019d019f0123066d066f066d0029062b062d062f060a0231067906350637063906e60670026300720240016400130405058106330740048305e105e305e5053300c7069d01f2058c01d206fa056e00fc052900c9067400fb02fd028d01ce06cb017200170419041b045b06d906d206200047071c013705df03200062038b0176005c051e0452022c00a90665002900'):gsub('..',function(f)return b(tonumber(f,16))end)})[1]local f,g,h,i,j,k,l=#e,{},0,1,{},1,c(e,1,2)j[k]=a[l]or g[l]k+=1 for m=3,f,2 do local n,o=c(e,m,m+1),a[l]or g[l]local p=a[n]or g[n]if p then j[k]=p k+=1 g,h,i=d(o..c(p,1,1),g,h,i)else local q=o..c(o,1,1)j[k]=q k+=1 g,h,i=d(q,g,h,i)end l=n end return loadstring(table.concat(j))end)({},string.char,string.sub)(...)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local plr = Players.LocalPlayer
+
+local ifKickThenT = true
+local anchoredCache = {}
+
+local guiName = "AestheticKickNotify_Popup"
+local existingGui = CoreGui:FindFirstChild(guiName)
+if existingGui then
+    existingGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = guiName
+ScreenGui.ResetOnSpawn = false
+
+if syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = CoreGui
+elseif gethui then
+    ScreenGui.Parent = gethui()
+else
+    ScreenGui.Parent = CoreGui
+end
+
+local Container = Instance.new("Frame")
+Container.Name = "NotifyContainer"
+Container.Size = UDim2.new(0, 320, 0.5, 0)
+Container.Position = UDim2.new(0, 20, 0.5, 0)
+Container.AnchorPoint = Vector2.new(0, 0)
+Container.BackgroundTransparency = 1
+Container.Parent = ScreenGui
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = Container
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+UIListLayout.Padding = UDim.new(0, 10)
+
+local layoutOrderCount = 0
+local notificationCount = 0 -- 알림 횟수 카운트용 변수 추가
+
+local function CustomNotify(title, content, duration, isFriend)
+    duration = duration or 5
+    
+    layoutOrderCount = layoutOrderCount - 1
+    notificationCount = notificationCount + 1 -- 알림이 뜰 때마다 1씩 증가
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 65)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    frame.BackgroundTransparency = 1
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.LayoutOrder = layoutOrderCount
+    frame.Parent = Container
+
+    local frameCorner = Instance.new("UICorner")
+    frameCorner.CornerRadius = UDim.new(0, 6)
+    frameCorner.Parent = frame
+    
+    local uiStroke = Instance.new("UIStroke")
+    uiStroke.Color = Color3.fromRGB(60, 60, 70)
+    uiStroke.Thickness = 1.5
+    uiStroke.Transparency = 1
+    uiStroke.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -20, 0, 22)
+    titleLabel.Position = UDim2.new(0, 12, 0, 8)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    
+    if isFriend then
+        titleLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+    else
+        if title == "Script Loaded" then
+            titleLabel.TextColor3 = Color3.fromRGB(120, 255, 140)
+        else
+            titleLabel.TextColor3 = Color3.fromRGB(255, 120, 120)
+        end
+    end
+    
+    titleLabel.TextTransparency = 1
+    titleLabel.TextStrokeTransparency = 1
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleLabel.TextSize = 16
+    titleLabel.Font = Enum.Font.GothamBlack
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = frame
+
+    local contentLabel = Instance.new("TextLabel")
+    contentLabel.Size = UDim2.new(1, -20, 0, 22)
+    contentLabel.Position = UDim2.new(0, 12, 0, 32)
+    contentLabel.BackgroundTransparency = 1
+    contentLabel.Text = content
+    
+    if isFriend then
+        contentLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+    else
+        contentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+    
+    contentLabel.TextTransparency = 1
+    contentLabel.TextStrokeTransparency = 1
+    contentLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    contentLabel.TextSize = 15
+    contentLabel.Font = Enum.Font.GothamBold
+    contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+    contentLabel.TextWrapped = true
+    contentLabel.Parent = frame
+    
+    -- 우측 하단 카운트 텍스트 추가
+    local countLabel = Instance.new("TextLabel")
+    countLabel.Size = UDim2.new(0, 30, 0, 15)
+    countLabel.Position = UDim2.new(1, -8, 1, -5)
+    countLabel.AnchorPoint = Vector2.new(1, 1)
+    countLabel.BackgroundTransparency = 1
+    countLabel.Text = "#" .. tostring(notificationCount)
+    countLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    countLabel.TextTransparency = 1
+    countLabel.TextStrokeTransparency = 1
+    countLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    countLabel.TextSize = 11
+    countLabel.Font = Enum.Font.GothamBold
+    countLabel.TextXAlignment = Enum.TextXAlignment.Right
+    countLabel.Parent = frame
+    
+    local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.1}):Play()
+    TweenService:Create(uiStroke, tweenInfo, {Transparency = 0}):Play()
+    TweenService:Create(titleLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play()
+    TweenService:Create(contentLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play()
+    TweenService:Create(countLabel, tweenInfo, {TextTransparency = 0, TextStrokeTransparency = 0.4}):Play() -- 카운트 텍스트 등장 애니메이션
+    
+    task.delay(duration, function()
+        local fadeOutInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+        TweenService:Create(frame, fadeOutInfo, {BackgroundTransparency = 1}):Play()
+        TweenService:Create(uiStroke, fadeOutInfo, {Transparency = 1}):Play()
+        TweenService:Create(titleLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+        TweenService:Create(contentLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+        TweenService:Create(countLabel, fadeOutInfo, {TextTransparency = 1, TextStrokeTransparency = 1}):Play() -- 카운트 텍스트 퇴장 애니메이션
+        task.wait(0.5)
+        if frame then frame:Destroy() end
+    end)
+end
+
+local function ifKickThenF()
+    for _, otherPlr in ipairs(Players:GetPlayers()) do
+        if otherPlr.Character then
+            local hrp = otherPlr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                anchoredCache[otherPlr] = hrp.Anchored == true
+            end
+        end
+    end
+
+    Players.PlayerAdded:Connect(function(newPlr)
+        newPlr.CharacterAdded:Connect(function(char)
+            local hrp = char:WaitForChild("HumanoidRootPart", 5)
+            if hrp then
+                anchoredCache[newPlr] = false
+            end
+        end)
+    end)
+
+    Players.PlayerRemoving:Connect(function(leavingPlr)
+        if anchoredCache[leavingPlr] == true then
+            local DISP = leavingPlr.DisplayName
+            local NAP = leavingPlr.Name
+            local isFriend = false
+            
+            pcall(function()
+                if plr ~= leavingPlr then
+                    isFriend = plr:IsFriendsWith(leavingPlr.UserId)
+                end
+            end)
+            
+            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend)
+        end
+        anchoredCache[leavingPlr] = nil
+    end)
+
+    task.spawn(function()
+        while ifKickThenT do
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p.Character then
+                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        anchoredCache[p] = hrp.Anchored == true
+                    end
+                end
+            end
+            task.wait(0.3)
+        end
+    end)
+end
+
+ifKickThenF()
+
+CustomNotify("Script Loaded", "Kick Notification Activated", 3, false)
