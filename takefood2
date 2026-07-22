@@ -7,14 +7,14 @@ if not getgenv().AntiHoleItems then
         Duration = 3
     })
     
-    local WhiteListMode = true
+    local WhiteListMode = true -- true로 할 시에 친구 아이템은 뺏어가지 않음
     local Whitelist = {}
     
     task.spawn(function()
-        local RunService = game:GetService("RunService")
+        local Players = game:GetService("Players")
         local dropPos = CFrame.new(0, -999999999, 0)
         local dropVec = Vector3.new(0, -999999999, 0)
-        local plr = game.Players.LocalPlayer
+        local plr = Players.LocalPlayer
         local targetItemsDict = {
             ["CupMugWhite"] = true, ["CupMugBrown"] = true, ["FoodBanana"] = true, ["FoodBread"] = true, ["FoodBroccoli"] = true, ["FoodCakePink"] = true, 
             ["FoodCoconut"] = true, ["FoodDippyEgg"] = true, ["FoodDonut"] = true, ["FoodFrenchFries"] = true, ["FoodHamburger"] = true, ["FoodHotdog"] = true, 
@@ -24,10 +24,23 @@ if not getgenv().AntiHoleItems then
             ["InstrumentGuitarUkulele"] = true, ["InstrumentGuitarViolin"] = true, ["InstrumentPianoKeyboard"] = true, ["InstrumentPianoMelodica"] = true, 
             ["InstrumentVoiceMicrophone"] = true, ["InstrumentWoodwindOcarina"] = true, ["InstrumentWoodwindSaxophone"] = true, ["InstrumentBrassVuvuzela"] = true
         }
-        local processedItems = {} 
-        local function GetMyPlotNumber()
+        local processedItems = {}
+        local cachedItems = {}
+        local myPlotNumber = nil
+        local connections = {}
+
+        local function IsWhitelisted(player)
+            if not WhiteListMode then return false end
+            if plr:IsFriendsWith(player.UserId) then return true end
+            for _, whiteName in ipairs(Whitelist) do
+                if player.Name == whiteName then return true end
+            end
+            return false
+        end
+
+        local function RefreshMyPlotNumber()
             local plots = workspace:FindFirstChild("Plots")
-            if not plots then return nil end
+            if not plots then myPlotNumber = nil return end
             for i = 1, 5 do
                 local plot = plots:FindFirstChild("Plot" .. i)
                 if plot then
@@ -36,13 +49,17 @@ if not getgenv().AntiHoleItems then
                         local owners = plotSign:FindFirstChild("ThisPlotsOwners")
                         if owners then
                             local ownerVal = owners:FindFirstChildOfClass("StringValue")
-                            if ownerVal and ownerVal.Value == plr.Name then return i end
+                            if ownerVal and ownerVal.Value == plr.Name then
+                                myPlotNumber = i
+                                return
+                            end
                         end
                     end
                 end
             end
-            return nil
+            myPlotNumber = nil
         end
+
         local function ProcessItem(item)
             if not item or not item.Parent then return end
             if processedItems[item] then return end
@@ -53,80 +70,137 @@ if not getgenv().AntiHoleItems then
             if holdRemote and dropRemote then
                 processedItems[item] = true
                 task.spawn(function()
-                    local attempts = 0
-                    local rapidFire = false
-                    while item and item.Parent and getgenv().AntiHoleItems do
+                    while item and item.Parent and getgenv().AntiHoleItems and cachedItems[item] do
                         local char = plr.Character
                         if not char then break end
-                        if rapidFire then
-                            local startTime = tick()
-                            while tick() - startTime < 3 and item and item.Parent and getgenv().AntiHoleItems do
-                                pcall(function()
-                                    holdRemote:InvokeServer(item, char)
-                                end)
-                                RunService.Heartbeat:Wait()
-                            end
+                        
+                        pcall(function()
+                            holdRemote:InvokeServer(item, char)
+                        end)
+                        
+                        task.wait(0.1)
+                        
+                        if item and item.Parent then
                             pcall(function()
                                 dropRemote:InvokeServer(item, dropPos, dropVec)
                             end)
-                            task.wait(0.5)
-                        else
-                            attempts = attempts + 1
-                            pcall(function()
-                                holdRemote:InvokeServer(item, char)
-                                dropRemote:InvokeServer(item, dropPos, dropVec)
-                            end)
-                            task.wait(0.5)
-                            if item and item.Parent then
-                                if attempts >= 3 then
-                                    rapidFire = true
-                                end
-                            end
                         end
+                        
+                        task.wait(0.2)
                     end
                     processedItems[item] = nil
                 end)
             end
         end
+
+        local function TryAddItem(item, ownerPlayer)
+            if not targetItemsDict[item.Name] then return end
+            if ownerPlayer and IsWhitelisted(ownerPlayer) then return end
+            cachedItems[item] = true
+            ProcessItem(item)
+        end
+
+        local function RemoveItem(item)
+            cachedItems[item] = nil
+        end
+
+        local function WatchToyFolder(folder, ownerPlayer)
+            if connections[folder] then return end
+            connections[folder] = {}
+            for _, item in ipairs(folder:GetChildren()) do
+                TryAddItem(item, ownerPlayer)
+            end
+            table.insert(connections[folder], folder.ChildAdded:Connect(function(item)
+                TryAddItem(item, ownerPlayer)
+            end))
+            table.insert(connections[folder], folder.ChildRemoved:Connect(function(item)
+                RemoveItem(item)
+            end))
+        end
+
+        local function WatchPlotFolder(folder, plotIndex)
+            if connections[folder] then return end
+            connections[folder] = {}
+            for _, item in ipairs(folder:GetChildren()) do
+                if plotIndex ~= myPlotNumber then TryAddItem(item, nil) end
+            end
+            table.insert(connections[folder], folder.ChildAdded:Connect(function(item)
+                if plotIndex ~= myPlotNumber then TryAddItem(item, nil) end
+            end))
+            table.insert(connections[folder], folder.ChildRemoved:Connect(function(item)
+                RemoveItem(item)
+            end))
+        end
+
+        local function SetupPlayerToyFolder(player)
+            if player == plr then return end
+            local folder = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
+            if folder then
+                WatchToyFolder(folder, player)
+            else
+                local conn
+                conn = workspace.ChildAdded:Connect(function(child)
+                    if child.Name == player.Name .. "SpawnedInToys" then
+                        WatchToyFolder(child, player)
+                        conn:Disconnect()
+                    end
+                end)
+            end
+        end
+
+        local function SetupPlotItems()
+            local plotItems = workspace:FindFirstChild("PlotItems")
+            if not plotItems then return end
+            for i = 1, 5 do
+                local plot = plotItems:FindFirstChild("Plot" .. i)
+                if plot then
+                    WatchPlotFolder(plot, i)
+                end
+            end
+        end
+
+        RefreshMyPlotNumber()
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            SetupPlayerToyFolder(player)
+        end
+        Players.PlayerAdded:Connect(function(player)
+            SetupPlayerToyFolder(player)
+        end)
+        Players.PlayerRemoving:Connect(function(player)
+            local folder = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
+            if folder and connections[folder] then
+                for _, c in ipairs(connections[folder]) do c:Disconnect() end
+                connections[folder] = nil
+            end
+        end)
+
+        SetupPlotItems()
+        if not workspace:FindFirstChild("PlotItems") then
+            local conn
+            conn = workspace.ChildAdded:Connect(function(child)
+                if child.Name == "PlotItems" then
+                    SetupPlotItems()
+                    conn:Disconnect()
+                end
+            end)
+        end
+
+        task.spawn(function()
+            while getgenv().AntiHoleItems do
+                task.wait(1)
+                RefreshMyPlotNumber()
+            end
+        end)
+
         while getgenv().AntiHoleItems do
             task.wait()
-            local char = plr.Character
-            if not char or not char.Parent then continue end
-            local myPlotNumber = GetMyPlotNumber()
-            local itemsToProcess = {}
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player == plr then continue end
-                if WhiteListMode then
-                    local isWhitelisted = false
-                    if plr:IsFriendsWith(player.UserId) then isWhitelisted = true end
-                    for _, whiteName in ipairs(Whitelist) do if player.Name == whiteName then isWhitelisted = true break end end
-                    if isWhitelisted then continue end
+            for item, _ in pairs(cachedItems) do
+                if not item.Parent then
+                    cachedItems[item] = nil
+                elseif not processedItems[item] then
+                    ProcessItem(item)
                 end
-                local folder = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
-                if folder then
-                    for _, item in ipairs(folder:GetChildren()) do
-                        if targetItemsDict[item.Name] then table.insert(itemsToProcess, item) end
-                    end
-                end
-            end
-            local plotItems = workspace:FindFirstChild("PlotItems")
-            if plotItems then
-                for i = 1, 5 do
-                    if i == myPlotNumber then continue end
-                    local plot = plotItems:FindFirstChild("Plot" .. i)
-                    if plot then
-                        for _, item in ipairs(plot:GetChildren()) do
-                            if targetItemsDict[item.Name] then table.insert(itemsToProcess, item) end
-                        end
-                    end
-                end
-            end
-            for _, item in ipairs(itemsToProcess) do
-                if not getgenv().AntiHoleItems then break end
-                ProcessItem(item)
-            end
-            for item, _ in pairs(processedItems) do
-                if not item.Parent then processedItems[item] = nil end
             end
         end
     end)
