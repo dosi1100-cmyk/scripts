@@ -21,163 +21,234 @@ local workspace = game:GetService("Workspace")
 local Whitelist = {} 
 local WhiteListMode = false 
 
-task.spawn(function()
-    local FallenY = workspace.FallenPartsDestroyHeight
-    local targetY = (FallenY <= -50000 and -49999) or (FallenY <= -100 and -99) or -100
-    local dropPos = CFrame.new(0, targetY, 9999)
-    local targetItems = {"CreatureBlobman", "TractorRed", "TractorOrange", "TractorGreen", "SantaSleigh"}
+local targetItems = {"CreatureBlobman", "TractorRed", "TractorOrange", "TractorGreen", "SantaSleigh"}
+local processedBlobs = {}
+local cleanupInterval = 1
+local watchedFolders = {}
+local connections = {}
 
-    local processedBlobs = {}
-    local cleanupInterval = 2
-
-    while getgenv().AntiVehicleToyEnabled do
-        task.wait(0.1)
-
-        local char = plr.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-
-        if not char or not root or not hum then continue end
-
-        local myPlotNumber = nil
-        local plots = workspace:FindFirstChild("Plots")
-        if plots then
-            for i = 1, 5 do
-                local plot = plots:FindFirstChild("Plot" .. i)
-                local plotSign = plot and plot:FindFirstChild("PlotSign")
-                local owners = plotSign and plotSign:FindFirstChild("ThisPlotsOwners")
-                local ownerVal = owners and owners:FindFirstChildOfClass("StringValue")
-                if ownerVal and ownerVal.Value == plr.Name then
-                    myPlotNumber = i
-                    break
-                end
+local function getMyPlotNumber()
+    local plots = workspace:FindFirstChild("Plots")
+    if plots then
+        for i = 1, 5 do
+            local plot = plots:FindFirstChild("Plot" .. i)
+            local plotSign = plot and plot:FindFirstChild("PlotSign")
+            local owners = plotSign and plotSign:FindFirstChild("ThisPlotsOwners")
+            local ownerVal = owners and owners:FindFirstChildOfClass("StringValue")
+            if ownerVal and ownerVal.Value == plr.Name then
+                return i
             end
         end
+    end
+    return nil
+end
 
-        local function collectItemsFromFolder(folder)
-            local items = {}
-            for _, item in ipairs(folder:GetChildren()) do
-                if item:IsA("Model") and table.find(targetItems, item.Name) then
-                    if item:FindFirstChild("VehicleSeat") then
-                        local vs = item:FindFirstChildOfClass("VehicleSeat")
-                        if vs and vs.Occupant then 
-                            if vs.Occupant == hum then
-                                table.insert(items, item)
-                            end
-                            continue 
-                        end
+local activeRetries = {}
 
-                        local itemId = tostring(item:GetDebugId())
-                        if not processedBlobs[itemId] then
-                            table.insert(items, item)
-                        end
-                    end
-                end
-            end
-            return items
-        end
+local function processItem(item)
+    if not getgenv().AntiVehicleToyEnabled then return end
 
-        local allItems = {}
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player == plr then continue end
-            if WhiteListMode then
-                local inWhitelist = false
-                for _, whiteName in ipairs(Whitelist) do 
-                    if player.Name == whiteName then 
-                        inWhitelist = true 
-                        break 
-                    end 
-                end
-                if inWhitelist then continue end
-            end
-            local folder = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
-            if folder then 
-                for _, item in ipairs(collectItemsFromFolder(folder)) do 
-                    table.insert(allItems, item) 
-                end 
-            end
-        end
+    local itemId = tostring(item:GetDebugId())
+    if processedBlobs[itemId] then return end
+    if activeRetries[itemId] then return end
 
-        local plotItems = workspace:FindFirstChild("PlotItems")
-        if plotItems then
-            for i = 1, 5 do
-                if i == myPlotNumber then continue end
-                local plot = plotItems:FindFirstChild("Plot" .. i)
-                if plot then 
-                    for _, item in ipairs(collectItemsFromFolder(plot)) do 
-                        table.insert(allItems, item) 
-                    end 
-                end
-            end
-        end
+    activeRetries[itemId] = true
 
-        for _, item in ipairs(allItems) do
-            if not getgenv().AntiVehicleToyEnabled then break end
-
-            local itemId = tostring(item:GetDebugId())
-
-            if processedBlobs[itemId] then
-                continue
-            end
-
+    task.spawn(function()
+        while getgenv().AntiVehicleToyEnabled and item.Parent do
             local char = plr.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             local hum = char and char:FindFirstChildOfClass("Humanoid")
-
             if not char or not root or not hum then break end
 
             local vs = item:FindFirstChildOfClass("VehicleSeat")
+            if not vs then break end
 
-            if vs then
-                if vs.Occupant and vs.Occupant ~= hum then 
-                    continue 
-                end
-
-                root.Anchored = true
-                vs:Sit(hum)
-
-                if hum and vs then
-                    task.wait(0.1)
-                    hum:ChangeState(Enum.HumanoidStateType.Running)
-                    task.wait()
-                    if item.PrimaryPart then item:SetPrimaryPartCFrame(dropPos) end
-                    
-                    root.Anchored = true
-                    task.wait(0.03)
-                    root.Anchored = false
-
-                    if root and vs then
-                        local connection
-                        connection = vs.AncestryChanged:Connect(function()
-                            if not vs or not vs.Parent then
-                                if connection then
-                                    connection:Disconnect()
-                                end
-                                processedBlobs[itemId] = true
-
-                                task.delay(cleanupInterval, function()
-                                    processedBlobs[itemId] = nil
-                                end)
-                            end
-                        end)
-
-                        task.delay(2, function()
-                            if connection then
-                                connection:Disconnect()
-                            end
-                            processedBlobs[itemId] = true
-
-                            task.delay(cleanupInterval, function()
-                                processedBlobs[itemId] = nil
-                            end)
-                        end)
-                    end
-                end
-
-                task.wait(0.01)
+            if vs.Occupant and vs.Occupant ~= hum then
+                break
             end
 
-            break
+            local FallenY = workspace.FallenPartsDestroyHeight
+            local targetY = (FallenY <= -50000 and -49999) or (FallenY <= -100 and -99) or -100
+            local dropPos = CFrame.new(0, targetY, 9999)
+
+            root.Anchored = true
+            vs:Sit(hum)
+
+            task.wait(0.1)
+            hum:ChangeState(Enum.HumanoidStateType.Running)
+            task.wait()
+            if item.PrimaryPart then item:SetPrimaryPartCFrame(dropPos) end
+
+            root.Anchored = true
+            task.wait(0.03)
+            root.Anchored = false
+
+            local destroyed = false
+            local connection
+            connection = vs.AncestryChanged:Connect(function()
+                if not vs or not vs.Parent then
+                    destroyed = true
+                end
+            end)
+
+            local waited = 0
+            while waited < 1 and item.Parent and not destroyed do
+                task.wait(0.1)
+                waited = waited + 0.1
+            end
+
+            if connection then
+                connection:Disconnect()
+            end
+
+            if not item.Parent or destroyed then
+                break
+            end
+
+            task.wait(0.1)
         end
+
+        processedBlobs[itemId] = true
+        activeRetries[itemId] = nil
+        task.delay(cleanupInterval, function()
+            processedBlobs[itemId] = nil
+        end)
+    end)
+end
+
+local function shouldSkipPlayerFolder(playerName)
+    if not WhiteListMode then return false end
+    for _, whiteName in ipairs(Whitelist) do
+        if playerName == whiteName then
+            return true
+        end
+    end
+    return false
+end
+
+local function watchFolder(folder, isPlotFolder, plotNumber, ownerName)
+    if watchedFolders[folder] then return end
+    watchedFolders[folder] = true
+
+    for _, item in ipairs(folder:GetChildren()) do
+        if item:IsA("Model") and table.find(targetItems, item.Name) then
+            if isPlotFolder then
+                if plotNumber ~= getMyPlotNumber() then
+                    task.spawn(processItem, item)
+                end
+            else
+                if not shouldSkipPlayerFolder(ownerName) then
+                    task.spawn(processItem, item)
+                end
+            end
+        end
+    end
+
+    local conn = folder.ChildAdded:Connect(function(item)
+        if not getgenv().AntiVehicleToyEnabled then return end
+        if not item:IsA("Model") or not table.find(targetItems, item.Name) then return end
+
+        if isPlotFolder then
+            if plotNumber == getMyPlotNumber() then return end
+        else
+            if shouldSkipPlayerFolder(ownerName) then return end
+        end
+
+        if item:FindFirstChildOfClass("VehicleSeat") then
+            task.spawn(processItem, item)
+        else
+            local seatConn
+            seatConn = item.ChildAdded:Connect(function(child)
+                if child:IsA("VehicleSeat") then
+                    if seatConn then seatConn:Disconnect() end
+                    task.spawn(processItem, item)
+                end
+            end)
+            table.insert(connections, seatConn)
+        end
+    end)
+    table.insert(connections, conn)
+end
+
+local function trySetupPlayerFolder(player)
+    if player == plr then return end
+    local folder = workspace:FindFirstChild(player.Name .. "SpawnedInToys")
+    if folder then
+        watchFolder(folder, false, nil, player.Name)
+    end
+end
+
+local function trySetupPlotFolders()
+    local plotItems = workspace:FindFirstChild("PlotItems")
+    if plotItems then
+        for i = 1, 5 do
+            local plot = plotItems:FindFirstChild("Plot" .. i)
+            if plot then
+                watchFolder(plot, true, i, nil)
+            end
+        end
+    end
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    trySetupPlayerFolder(player)
+end
+trySetupPlotFolders()
+
+local playerAddedConn = Players.PlayerAdded:Connect(function(player)
+    if not getgenv().AntiVehicleToyEnabled then return end
+    task.spawn(function()
+        local folder = player:WaitForChild(player.Name .. "SpawnedInToys", 30)
+        if folder and getgenv().AntiVehicleToyEnabled then
+            watchFolder(folder, false, nil, player.Name)
+        end
+    end)
+end)
+table.insert(connections, playerAddedConn)
+
+local workspaceAddedConn = workspace.ChildAdded:Connect(function(child)
+    if not getgenv().AntiVehicleToyEnabled then return end
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= plr and child.Name == player.Name .. "SpawnedInToys" then
+            watchFolder(child, false, nil, player.Name)
+            return
+        end
+    end
+
+    if child.Name == "PlotItems" then
+        task.spawn(function()
+            for i = 1, 5 do
+                local plot = child:WaitForChild("Plot" .. i, 10)
+                if plot and getgenv().AntiVehicleToyEnabled then
+                    watchFolder(plot, true, i, nil)
+                end
+            end
+        end)
+    end
+end)
+table.insert(connections, workspaceAddedConn)
+
+local plotItemsFolder = workspace:FindFirstChild("PlotItems")
+if plotItemsFolder then
+    local plotChildAddedConn = plotItemsFolder.ChildAdded:Connect(function(child)
+        if not getgenv().AntiVehicleToyEnabled then return end
+        for i = 1, 5 do
+            if child.Name == "Plot" .. i then
+                watchFolder(child, true, i, nil)
+                break
+            end
+        end
+    end)
+    table.insert(connections, plotChildAddedConn)
+end
+
+task.spawn(function()
+    while getgenv().AntiVehicleToyEnabled do
+        task.wait(5)
+    end
+    for _, conn in ipairs(connections) do
+        if conn then conn:Disconnect() end
     end
 end)
