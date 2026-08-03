@@ -1,0 +1,59 @@
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+local function createFakeLeg(character, torso, name, isLeft)
+	local fakeLeg = Instance.new("Part")
+	fakeLeg.Name = name
+	fakeLeg.Size = Vector3.new(1, 2, 1)
+	fakeLeg.Transparency = 1
+	fakeLeg.CanCollide = false
+	fakeLeg.Massless = false
+	fakeLeg.Parent = character
+
+	local hip = Instance.new("Motor6D")
+	hip.Name = isLeft and "Left Hip" or "Right Hip"
+	hip.Part0 = torso
+	hip.Part1 = fakeLeg
+	hip.MaxVelocity = 0.1
+	hip.CurrentAngle = 0
+
+	if isLeft then
+		hip.C0 = CFrame.new(-1, -1, 0, -0, -0, -1, 0, 1, 0, 1, 0, 0)
+		hip.C1 = CFrame.new(-0.5, 1, 0, -0, -0, -1, 0, 1, 0, 1, 0, 0)
+	else
+		hip.C0 = CFrame.new(1, -1, 0, 0, 0, 1, 0, 1, 0, -1, -0, -0)
+		hip.C1 = CFrame.new(0.5, 1, 0, 0, 0, 1, 0, 1, 0, -1, -0, -0)
+	end
+
+	hip.Parent = torso
+	return fakeLeg
+end
+
+local function setupCharacter(character)
+	local torso = character:WaitForChild("Torso", 10)
+	if not torso then return end
+
+	local function checkLegs()
+		local leftLeg = character:FindFirstChild("Left Leg")
+		local rightLeg = character:FindFirstChild("Right Leg")
+
+		if not leftLeg and not rightLeg then
+			createFakeLeg(character, torso, "Left Leg", true)
+			createFakeLeg(character, torso, "Right Leg", false)
+		end
+	end
+
+	character.ChildRemoved:Connect(function(child)
+		if child.Name == "Left Leg" or child.Name == "Right Leg" then
+			task.defer(checkLegs)
+		end
+	end)
+
+	checkLegs()
+end
+
+if localPlayer.Character then
+	setupCharacter(localPlayer.Character)
+end
+
+localPlayer.CharacterAdded:Connect(setupCharacter)
