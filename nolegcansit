@@ -33,6 +33,9 @@ local function setupCharacter(character)
 	local torso = character:WaitForChild("Torso", 10)
 	if not torso then return end
 
+	character:WaitForChild("Left Leg", 5)
+	character:WaitForChild("Right Leg", 5)
+
 	local function checkLegs()
 		local leftLeg = character:FindFirstChild("Left Leg")
 		local rightLeg = character:FindFirstChild("Right Leg")
