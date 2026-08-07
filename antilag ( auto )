@@ -64,32 +64,33 @@ local function UpdateCharBeamState()
     end
 end
 
-local function FlagPlayer(fromPlr)
+local function FlagPlayer(fromPlr, isExplosive)
     local data = AL.fireCount[fromPlr]
     if not data then return end
-    if data.isFlagged then return end
 
     data.isFlagged = true
 
+    local wasLagging = AL.isLagging
     if not AL.isLagging then
         AL.isLagging = true
         AL.suspectPlayer = fromPlr
 
         UpdateCharBeamState()
+    end
+
+    if AL.isFpsLow and not isExplosive then
+        return
+    end
+
+    local currentTime = os.clock()
+    if currentTime - (data.lastNotifyTime or 0) >= 5 then
+        data.lastNotifyTime = currentTime
 
         pcall(function()
             StarterGui:SetCore("SendNotification", {
-                Title = "[ 렉 감지 ]",
+                Title = wasLagging and "[ 추가 렉 감지 ]" or "[ 렉 감지 ]",
                 Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
                 Duration = 5
-            })
-        end)
-    else
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "[ 추가 렉 감지 ]",
-                Text = fromPlr.Name .. " [ " .. fromPlr.DisplayName .. " ]",
-                Duration = 3
             })
         end)
     end
@@ -179,18 +180,23 @@ local function AntiLagF()
                 lastFrame = 0,
                 frameBurst = 0,
                 rapidWindowStart = 0,
-                rapidCount = 0
+                rapidCount = 0,
+                lastNotifyTime = 0
             }
         end
 
         local data = AL.fireCount[fromPlr]
         local currentTime = os.clock()
+        local isExplosive = false
 
         if data.lastFrame == AL.globalFrame then
             data.frameBurst += 1
 
             if data.frameBurst >= AL.FrameBurstLimit then
-                FlagPlayer(fromPlr)
+                if data.frameBurst >= 5 then
+                    isExplosive = true
+                end
+                FlagPlayer(fromPlr, isExplosive)
             end
         else
             data.lastFrame = AL.globalFrame
@@ -205,19 +211,22 @@ local function AntiLagF()
             data.rapidCount += 1
 
             if data.rapidCount >= AL.RapidLimit then
-                FlagPlayer(fromPlr)
+                isExplosive = true
+                FlagPlayer(fromPlr, isExplosive)
             end
         end
 
         if data.lastCallTime ~= 0 and (currentTime - data.lastCallTime) <= 0.025 then
-            data.count = AL.AntiLagV
+            if not AL.isFpsLow then
+                data.count = AL.AntiLagV
+            end
         end
 
         data.lastCallTime = currentTime
         data.count += 1
 
         if data.count >= AL.AntiLagV then
-            FlagPlayer(fromPlr)
+            FlagPlayer(fromPlr, isExplosive)
         end
     end)
 end
