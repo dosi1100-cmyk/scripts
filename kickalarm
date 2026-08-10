@@ -203,4 +203,4 @@ end
 
 ifKickThenF()
 
-CustomNotify("Script Loaded", "Kick Notification Activated", 3, false)
+CustomNotify("Script Loaded", "Kick NotificationV2 Activated", 3, false)
