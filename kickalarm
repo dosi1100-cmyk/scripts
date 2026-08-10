@@ -7,6 +7,7 @@ local plr = Players.LocalPlayer
 
 local ifKickThenT = true
 local anchoredCache = {}
+local userKickCounts = {}
 
 local guiName = "AestheticKickNotify_Popup"
 local existingGui = CoreGui:FindFirstChild(guiName)
@@ -42,13 +43,10 @@ UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 UIListLayout.Padding = UDim.new(0, 10)
 
 local layoutOrderCount = 0
-local notificationCount = -1
 
-local function CustomNotify(title, content, duration, isFriend)
+local function CustomNotify(title, content, duration, isFriend, kickCount)
     duration = duration or 5
-    
     layoutOrderCount = layoutOrderCount - 1
-    notificationCount = notificationCount + 1
     
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 65)
@@ -119,7 +117,7 @@ local function CustomNotify(title, content, duration, isFriend)
     countLabel.Position = UDim2.new(1, -8, 1, -5)
     countLabel.AnchorPoint = Vector2.new(1, 1)
     countLabel.BackgroundTransparency = 1
-    countLabel.Text = "#" .. tostring(notificationCount)
+    countLabel.Text = kickCount and ("#" .. tostring(kickCount)) or ""
     countLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
     countLabel.TextTransparency = 1
     countLabel.TextStrokeTransparency = 1
@@ -171,7 +169,11 @@ local function ifKickThenF()
         if anchoredCache[leavingPlr] == true then
             local DISP = leavingPlr.DisplayName
             local NAP = leavingPlr.Name
+            local userId = leavingPlr.UserId
             local isFriend = false
+            
+            userKickCounts[userId] = (userKickCounts[userId] or 0) + 1
+            local currentKickCount = userKickCounts[userId]
             
             pcall(function()
                 if plr ~= leavingPlr then
@@ -179,7 +181,7 @@ local function ifKickThenF()
                 end
             end)
             
-            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend)
+            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount)
         end
         anchoredCache[leavingPlr] = nil
     end)
