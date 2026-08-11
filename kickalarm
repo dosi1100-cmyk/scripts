@@ -8,6 +8,7 @@ local plr = Players.LocalPlayer
 local ifKickThenT = true
 local anchoredCache = {}
 local userKickCounts = {}
+local totalKickedPeople = 0
 
 local guiName = "AestheticKickNotify_Popup"
 local existingGui = CoreGui:FindFirstChild(guiName)
@@ -44,7 +45,7 @@ UIListLayout.Padding = UDim.new(0, 10)
 
 local layoutOrderCount = 0
 
-local function CustomNotify(title, content, duration, isFriend, kickCount)
+local function CustomNotify(title, content, duration, isFriend, kickCount, totalKicked)
     duration = duration or 5
     layoutOrderCount = layoutOrderCount - 1
     
@@ -113,11 +114,19 @@ local function CustomNotify(title, content, duration, isFriend, kickCount)
     contentLabel.Parent = frame
     
     local countLabel = Instance.new("TextLabel")
-    countLabel.Size = UDim2.new(0, 30, 0, 15)
+    countLabel.Size = UDim2.new(0, 100, 0, 15)
     countLabel.Position = UDim2.new(1, -8, 1, -5)
     countLabel.AnchorPoint = Vector2.new(1, 1)
     countLabel.BackgroundTransparency = 1
-    countLabel.Text = kickCount and ("#" .. tostring(kickCount)) or ""
+    
+    if kickCount and totalKicked then
+        countLabel.Text = "#" .. tostring(totalKicked) .. " @" .. tostring(kickCount)
+    elseif kickCount then
+        countLabel.Text = "@" .. tostring(kickCount)
+    else
+        countLabel.Text = ""
+    end
+    
     countLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
     countLabel.TextTransparency = 1
     countLabel.TextStrokeTransparency = 1
@@ -172,6 +181,10 @@ local function ifKickThenF()
             local userId = leavingPlr.UserId
             local isFriend = false
             
+            if not userKickCounts[userId] then
+                totalKickedPeople = totalKickedPeople + 1
+            end
+            
             userKickCounts[userId] = (userKickCounts[userId] or 0) + 1
             local currentKickCount = userKickCounts[userId]
             
@@ -181,7 +194,7 @@ local function ifKickThenF()
                 end
             end)
             
-            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount)
+            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
         end
         anchoredCache[leavingPlr] = nil
     end)
@@ -203,4 +216,4 @@ end
 
 ifKickThenF()
 
-CustomNotify("Script Loaded", "Kick NotificationV2 Activated", 3, false)
+CustomNotify("Script Loaded", "Kick NotificationV2.2 Activated", 3, false)
