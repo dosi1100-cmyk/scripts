@@ -120,9 +120,9 @@ local function CustomNotify(title, content, duration, isFriend, kickCount, total
     countLabel.BackgroundTransparency = 1
     
     if kickCount and totalKicked then
-        countLabel.Text = "#" .. tostring(totalKicked) .. " @" .. tostring(kickCount)
+        countLabel.Text = "# " .. tostring(totalKicked) .. " @ " .. tostring(kickCount)
     elseif kickCount then
-        countLabel.Text = "@" .. tostring(kickCount)
+        countLabel.Text = "@ " .. tostring(kickCount)
     else
         countLabel.Text = ""
     end
