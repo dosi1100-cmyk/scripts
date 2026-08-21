@@ -7,6 +7,7 @@ local plr = Players.LocalPlayer
 
 local ifKickThenT = true
 local anchoredCache = {}
+local lastPositions = {}
 local userKickCounts = {}
 local totalKickedPeople = 0
 
@@ -72,12 +73,14 @@ local function CustomNotify(title, content, duration, isFriend, kickCount, total
     titleLabel.Size = UDim2.new(1, -20, 0, 22)
     titleLabel.Position = UDim2.new(0, 12, 0, 8)
     titleLabel.BackgroundTransparency = 1
+    titleLabel.RichText = true
     titleLabel.Text = title
     
     if isFriend then
         titleLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
     else
-        if title == "Script Loaded" then
+        -- Script Loaded 등의 알림에서 색상을 처리하기 위해 일반 텍스트 매칭 대신 string.find 사용
+        if string.find(title, "Script Loaded") then
             titleLabel.TextColor3 = Color3.fromRGB(120, 255, 140)
         else
             titleLabel.TextColor3 = Color3.fromRGB(255, 120, 120)
@@ -156,22 +159,29 @@ local function CustomNotify(title, content, duration, isFriend, kickCount, total
 end
 
 local function ifKickThenF()
-    for _, otherPlr in ipairs(Players:GetPlayers()) do
+    local function trackPlayer(otherPlr)
         if otherPlr.Character then
             local hrp = otherPlr.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
                 anchoredCache[otherPlr] = hrp.Anchored == true
+                lastPositions[otherPlr] = hrp.Position
             end
         end
+
+        otherPlr.CharacterRemoving:Connect(function(char)
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                lastPositions[otherPlr] = hrp.Position
+            end
+        end)
+    end
+
+    for _, otherPlr in ipairs(Players:GetPlayers()) do
+        trackPlayer(otherPlr)
     end
 
     Players.PlayerAdded:Connect(function(newPlr)
-        newPlr.CharacterAdded:Connect(function(char)
-            local hrp = char:WaitForChild("HumanoidRootPart", 5)
-            if hrp then
-                anchoredCache[newPlr] = false
-            end
-        end)
+        trackPlayer(newPlr)
     end)
 
     Players.PlayerRemoving:Connect(function(leavingPlr)
@@ -194,9 +204,21 @@ local function ifKickThenF()
                 end
             end)
             
-            CustomNotify("[ Kick Detected ]", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
+            local pos = lastPositions[leavingPlr]
+            if not pos and leavingPlr.Character then
+                local hrp = leavingPlr.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then pos = hrp.Position end
+            end
+
+            local posText = "Pos : ?,?,?"
+            if pos then
+                posText = string.format("Pos : %d,%d,%d", math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
+            end
+
+            CustomNotify("[ Kick Detected ] <font face=\"GothamBold\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
         end
         anchoredCache[leavingPlr] = nil
+        lastPositions[leavingPlr] = nil
     end)
 
     task.spawn(function()
@@ -206,6 +228,7 @@ local function ifKickThenF()
                     local hrp = p.Character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         anchoredCache[p] = hrp.Anchored == true
+                        lastPositions[p] = hrp.Position
                     end
                 end
             end
@@ -216,4 +239,4 @@ end
 
 ifKickThenF()
 
-CustomNotify("Script Loaded", "Kick NotificationV2.2 Activated", 3, false)
+CustomNotify("Script Loaded", "Kick NotificationV2.4 Activated", 3, false)
