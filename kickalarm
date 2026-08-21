@@ -11,7 +11,7 @@ local lastPositions = {}
 local userKickCounts = {}
 local totalKickedPeople = 0
 
-local guiName = "AestheticKickNotify_Popup"
+local guiName = "KickNotify"
 local existingGui = CoreGui:FindFirstChild(guiName)
 if existingGui then
     existingGui:Destroy()
