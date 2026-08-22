@@ -79,7 +79,6 @@ local function CustomNotify(title, content, duration, isFriend, kickCount, total
     if isFriend then
         titleLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
     else
-        -- Script Loaded 등의 알림에서 색상을 처리하기 위해 일반 텍스트 매칭 대신 string.find 사용
         if string.find(title, "Script Loaded") then
             titleLabel.TextColor3 = Color3.fromRGB(120, 255, 140)
         else
@@ -91,7 +90,7 @@ local function CustomNotify(title, content, duration, isFriend, kickCount, total
     titleLabel.TextStrokeTransparency = 1
     titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     titleLabel.TextSize = 16
-    titleLabel.Font = Enum.Font.GothamBlack
+    titleLabel.Font = Enum.Font.GothamBold
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = frame
 
@@ -215,7 +214,7 @@ local function ifKickThenF()
                 posText = string.format("Pos : %d,%d,%d", math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
             end
 
-            CustomNotify("[ Kick Detected ] <font face=\"GothamBold\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
+            CustomNotify("[ Kick Detected ] <font size=\"13\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
         end
         anchoredCache[leavingPlr] = nil
         lastPositions[leavingPlr] = nil
@@ -239,4 +238,4 @@ end
 
 ifKickThenF()
 
-CustomNotify("Script Loaded", "Kick NotificationV2.4 Activated", 3, false)
+CustomNotify("Script Loaded", "Kick NotificationV2.5 Activated", 3, false)
