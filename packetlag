@@ -1,9 +1,0 @@
-local base = "Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls Balls "
-
-local hugeString = base:rep(10000)
-
-local args = {
-    [1] = hugeString
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("GrabEvents"):WaitForChild("ExtendGrabLine"):FireServer(unpack(args))
