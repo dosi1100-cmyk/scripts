@@ -139,7 +139,15 @@ local function startFKeyAttack(targetPlayer)
 
         pcall(function()
             CreateGrabLine:FireServer(tgtRoot, grabCFrame)
-            SetNetworkOwner:FireServer(tgtRoot, CFrame.lookAt(myRoot.Position, tgtRoot.Position))
+            
+            local lookCF = CFrame.lookAt(myRoot.Position, tgtRoot.Position)
+            
+            SetNetworkOwner:FireServer(tgtRoot, lookCF)
+            SetNetworkOwner:FireServer(tgtRoot, lookCF)
+            DestroyGrabLine:FireServer(tgtRoot)
+            
+            SetNetworkOwner:FireServer(tgtRoot, lookCF)
+            SetNetworkOwner:FireServer(tgtRoot, lookCF)
             DestroyGrabLine:FireServer(tgtRoot)
         end)
     end)
