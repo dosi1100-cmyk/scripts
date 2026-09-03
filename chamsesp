@@ -71,6 +71,15 @@ local function handleNPC(model)
     end
 end
 
+local function scanNPCs()
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if not _G.ChamsToggle then break end
+        if obj:IsA("Model") then
+            handleNPC(obj)
+        end
+    end
+end
+
 if _G.ChamsToggle then
     for _, player in pairs(Players:GetPlayers()) do
         handlePlayer(player)
@@ -79,24 +88,15 @@ if _G.ChamsToggle then
     local joinConn = Players.PlayerAdded:Connect(handlePlayer)
     table.insert(_G.ChamsConnections, joinConn)
     
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("Model") then
-            handleNPC(obj)
-        end
-    end
+    scanNPCs()
     
-    local npcConn = Workspace.DescendantAdded:Connect(function(descendant)
-        if descendant:IsA("Model") then
-            task.wait(0.1)
-            handleNPC(descendant)
-        elseif descendant:IsA("Humanoid") or descendant.Name == "HumanoidRootPart" or descendant.Name == "Torso" or descendant.Name == "UpperTorso" then
-            if descendant.Parent and descendant.Parent:IsA("Model") then
-                task.wait(0.1)
-                handleNPC(descendant.Parent)
-            end
+    task.spawn(function()
+        while _G.ChamsToggle do
+            task.wait(1)
+            if not _G.ChamsToggle then break end
+            scanNPCs()
         end
     end)
-    table.insert(_G.ChamsConnections, npcConn)
     
     if setclipboard then
         print("Chams ESP: ON")
