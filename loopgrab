@@ -149,17 +149,15 @@ getgenv().LoopGrabInputConnection = UserInputService.InputBegan:Connect(function
                     if tgtTorso and myTorso and tgtHead then
                         SetNetworkOwner:FireServer(tgtTorso, tgtTorso.CFrame)
 
-                        if tgtHead:FindFirstChild("PartOwner") then
-                            local targetPos = cam.CFrame.Position + (cam.CFrame.LookVector * 23)
-                            local newCFrame = CFrame.new(targetPos)
+                        local targetPos = cam.CFrame.Position + (cam.CFrame.LookVector * 23)
+                        local newCFrame = CFrame.new(targetPos)
 
-                            tgtTorso.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                            tgtTorso.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                        tgtTorso.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                        tgtTorso.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 
-                            tgtTorso.CFrame = newCFrame
+                        tgtTorso.CFrame = newCFrame
 
-                            SetNetworkOwner:FireServer(tgtTorso, newCFrame)
-                        end
+                        SetNetworkOwner:FireServer(tgtTorso, newCFrame)
                     end
                 end)
             end
