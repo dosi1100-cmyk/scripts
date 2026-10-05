@@ -1,19 +1,20 @@
 if not getgenv().AntiHoleItems then
     getgenv().AntiHoleItems = true
-    
+
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "[ 안티 홀드파트 ]",
         Text = "켜짐🟢",
         Duration = 3
     })
-    
+
     local WhiteListMode = true -- true로 할 시에 친구 아이템은 뺏어가지 않음
     local Whitelist = {}
-    
+
     task.spawn(function()
         local Players = game:GetService("Players")
-        local dropPos = CFrame.new(0, -999999999, 0)
-        local dropVec = Vector3.new(0, -999999999, 0)
+        local destroyHeight = workspace.FallenPartsDestroyHeight - 500
+        local dropPos = CFrame.new(0, destroyHeight, 0)
+        local dropVec = Vector3.new(0, -100000, 0)
         local plr = Players.LocalPlayer
         local targetItemsDict = {
             ["CupMugWhite"] = true, ["CupMugBrown"] = true, ["FoodBanana"] = true, ["FoodBread"] = true, ["FoodBroccoli"] = true, ["FoodCakePink"] = true, 
@@ -73,19 +74,19 @@ if not getgenv().AntiHoleItems then
                     while item and item.Parent and getgenv().AntiHoleItems and cachedItems[item] do
                         local char = plr.Character
                         if not char then break end
-                        
+
                         pcall(function()
                             holdRemote:InvokeServer(item, char)
                         end)
-                        
+
                         task.wait(0.1)
-                        
+
                         if item and item.Parent then
                             pcall(function()
                                 dropRemote:InvokeServer(item, dropPos, dropVec)
                             end)
                         end
-                        
+
                         task.wait(0.2)
                     end
                     processedItems[item] = nil
