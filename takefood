@@ -12,7 +12,7 @@ if not getgenv().AntiHoleItems then
 
     task.spawn(function()
         local Players = game:GetService("Players")
-        local destroyHeight = workspace.FallenPartsDestroyHeight - 100
+        local destroyHeight = workspace.FallenPartsDestroyHeight - 500
         local dropPos = CFrame.new(0, destroyHeight, 0)
         local dropVec = Vector3.new(0, -100000, 0)
         local plr = Players.LocalPlayer
