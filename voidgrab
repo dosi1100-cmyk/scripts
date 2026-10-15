@@ -4,10 +4,9 @@ if getgenv().LoopGrabActive then
         Text = "이미 켜져있습니다!",
         Duration = 3
     })
-    return -- 이미 켜져있으므로 아래 코드는 무시하고 종료
+    return
 end
 
--- 켜짐 상태로 변경 및 알림
 getgenv().LoopGrabActive = true
 game.StarterGui:SetCore("SendNotification", {
     Title = "Void Grab",
@@ -18,6 +17,47 @@ game.StarterGui:SetCore("SendNotification", {
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local plr = Players.LocalPlayer
+
+local destroyThread = nil
+
+local function startDestroy(part)
+    local original = workspace.FallenPartsDestroyHeight
+
+    if destroyThread then
+        task.cancel(destroyThread)
+    end
+
+    destroyThread = task.delay(math.clamp(plr:GetNetworkPing() + 0.05, 0.08, 0.25), function()
+        workspace.FallenPartsDestroyHeight = -10000
+        task.wait()
+        workspace.FallenPartsDestroyHeight = original
+        destroyThread = nil
+    end)
+
+    task.delay(0.5, function()
+        local grabEvents = ReplicatedStorage:FindFirstChild("GrabEvents")
+        local remote = grabEvents and grabEvents:FindFirstChild("DestroyGrabLine")
+        if remote then
+            remote:FireServer(part)
+        end
+    end)
+end
+
+local function sendVoid(part, ownerPlayer)
+    if not part.Parent then
+        return
+    end
+
+    local model = ownerPlayer and ownerPlayer.Character or part:FindFirstAncestorOfClass("Model")
+
+    pcall(function()
+        if model then
+            model:PivotTo(CFrame.new(0, -11111, 0))
+        else
+            part.CFrame = CFrame.new(0, -11111, 0)
+        end
+    end)
+end
 
 task.spawn(function()
     while getgenv().LoopGrabActive do
@@ -40,24 +80,16 @@ task.spawn(function()
                 end
             end
 
+            local started = false
+
             while getgenv().LoopGrabActive and workspace:FindFirstChild("GrabParts") do
                 -- 파트가 앵커되어 있지 않을 때만 공허로 보내도록 조건 추가
                 if not part1.Anchored then
-                    if ownerPlayer then
-                        local tgtTorso = ownerPlayer.Character and ownerPlayer.Character:FindFirstChild("HumanoidRootPart") 
-                        
-                        if tgtTorso then
-                            pcall(function()
-                                tgtTorso.CFrame = CFrame.new(tgtTorso.Position.X, -59999, tgtTorso.Position.Z)
-                            end)
-                        end
-                    else
-                        if part1.Parent then
-                            pcall(function()
-                                part1.CFrame = CFrame.new(part1.Position.X, -59999, part1.Position.Z)
-                            end)
-                        end
+                    if not started then
+                        started = true
+                        startDestroy(part1)
                     end
+                    sendVoid(part1, ownerPlayer)
                 end
                 task.wait()
             end
