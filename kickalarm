@@ -5,7 +5,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local plr = Players.LocalPlayer
 
-local KickLogs = {}
+local loggedCharacters = {}
 local userKickCounts = {}
 local totalKickedPeople = 0
 
@@ -160,34 +160,32 @@ workspace.ChildAdded:Connect(function(child)
         for _, otherPlr in ipairs(Players:GetPlayers()) do
             if otherPlr ~= plr then
                 local char = otherPlr.Character
-                if char then
+                if char and not loggedCharacters[char] then
                     local hrp = char:FindFirstChild("HumanoidRootPart")
                     if hrp and hrp.Anchored then
+                        loggedCharacters[char] = true
+                        
                         local userId = otherPlr.UserId
-                        if not KickLogs[userId] then
-                            KickLogs[userId] = true
-                            
-                            local DISP = otherPlr.DisplayName
-                            local NAP = otherPlr.Name
-                            local isFriend = false
-                            
-                            if not userKickCounts[userId] then
-                                totalKickedPeople = totalKickedPeople + 1
-                            end
-                            
-                            userKickCounts[userId] = (userKickCounts[userId] or 0) + 1
-                            local currentKickCount = userKickCounts[userId]
-                            
-                            pcall(function()
-                                isFriend = plr:IsFriendsWith(userId)
-                            end)
-                            
-                            local pos = hrp.Position
-                            local posText = string.format("Pos : %d,%d,%d", math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
-                            
-                            CustomNotify("[ Kick Detected ] <font size=\"13\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
-                            break
+                        local DISP = otherPlr.DisplayName
+                        local NAP = otherPlr.Name
+                        local isFriend = false
+                        
+                        if not userKickCounts[userId] then
+                            totalKickedPeople = totalKickedPeople + 1
                         end
+                        
+                        userKickCounts[userId] = (userKickCounts[userId] or 0) + 1
+                        local currentKickCount = userKickCounts[userId]
+                        
+                        pcall(function()
+                            isFriend = plr:IsFriendsWith(userId)
+                        end)
+                        
+                        local pos = hrp.Position
+                        local posText = string.format("Pos : %d,%d,%d", math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
+                        
+                        CustomNotify("[ Kick Detected ] <font size=\"13\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
+                        break
                     end
                 end
             end
@@ -195,4 +193,4 @@ workspace.ChildAdded:Connect(function(child)
     end
 end)
 
-CustomNotify("Script Loaded", "Kick NotificationV2.6 Activated", 3, false)
+CustomNotify("Script Loaded", "Kick NotificationV2.7 Activated", 3, false)
