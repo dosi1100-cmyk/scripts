@@ -5,9 +5,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local plr = Players.LocalPlayer
 
-local ifKickThenT = true
-local anchoredCache = {}
-local lastPositions = {}
+local KickLogs = {}
 local userKickCounts = {}
 local totalKickedPeople = 0
 
@@ -157,85 +155,44 @@ local function CustomNotify(title, content, duration, isFriend, kickCount, total
     end)
 end
 
-local function ifKickThenF()
-    local function trackPlayer(otherPlr)
-        if otherPlr.Character then
-            local hrp = otherPlr.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                anchoredCache[otherPlr] = hrp.Anchored == true
-                lastPositions[otherPlr] = hrp.Position
-            end
-        end
-
-        otherPlr.CharacterRemoving:Connect(function(char)
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                lastPositions[otherPlr] = hrp.Position
-            end
-        end)
-    end
-
-    for _, otherPlr in ipairs(Players:GetPlayers()) do
-        trackPlayer(otherPlr)
-    end
-
-    Players.PlayerAdded:Connect(function(newPlr)
-        trackPlayer(newPlr)
-    end)
-
-    Players.PlayerRemoving:Connect(function(leavingPlr)
-        if anchoredCache[leavingPlr] == true then
-            local DISP = leavingPlr.DisplayName
-            local NAP = leavingPlr.Name
-            local userId = leavingPlr.UserId
-            local isFriend = false
-            
-            if not userKickCounts[userId] then
-                totalKickedPeople = totalKickedPeople + 1
-            end
-            
-            userKickCounts[userId] = (userKickCounts[userId] or 0) + 1
-            local currentKickCount = userKickCounts[userId]
-            
-            pcall(function()
-                if plr ~= leavingPlr then
-                    isFriend = plr:IsFriendsWith(leavingPlr.UserId)
-                end
-            end)
-            
-            local pos = lastPositions[leavingPlr]
-            if not pos and leavingPlr.Character then
-                local hrp = leavingPlr.Character:FindFirstChild("HumanoidRootPart")
-                if hrp then pos = hrp.Position end
-            end
-
-            local posText = "Pos : ?,?,?"
-            if pos then
-                posText = string.format("Pos : %d,%d,%d", math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
-            end
-
-            CustomNotify("[ Kick Detected ] <font size=\"13\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
-        end
-        anchoredCache[leavingPlr] = nil
-        lastPositions[leavingPlr] = nil
-    end)
-
-    task.spawn(function()
-        while ifKickThenT do
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p.Character then
-                    local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        anchoredCache[p] = hrp.Anchored == true
-                        lastPositions[p] = hrp.Position
+workspace.ChildAdded:Connect(function(child)
+    if child.Name == "BlackHoleKick" then
+        for _, otherPlr in ipairs(Players:GetPlayers()) do
+            if otherPlr ~= plr then
+                local char = otherPlr.Character
+                if char then
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    if hrp and hrp.Anchored then
+                        local userId = otherPlr.UserId
+                        if not KickLogs[userId] then
+                            KickLogs[userId] = true
+                            
+                            local DISP = otherPlr.DisplayName
+                            local NAP = otherPlr.Name
+                            local isFriend = false
+                            
+                            if not userKickCounts[userId] then
+                                totalKickedPeople = totalKickedPeople + 1
+                            end
+                            
+                            userKickCounts[userId] = (userKickCounts[userId] or 0) + 1
+                            local currentKickCount = userKickCounts[userId]
+                            
+                            pcall(function()
+                                isFriend = plr:IsFriendsWith(userId)
+                            end)
+                            
+                            local pos = hrp.Position
+                            local posText = string.format("Pos : %d,%d,%d", math.round(pos.X), math.round(pos.Y), math.round(pos.Z))
+                            
+                            CustomNotify("[ Kick Detected ] <font size=\"13\">" .. posText .. "</font>", "[" .. DISP .. "] (@" .. NAP .. ")", 8, isFriend, currentKickCount, totalKickedPeople)
+                            break
+                        end
                     end
                 end
             end
-            task.wait(0.3)
         end
-    end)
-end
+    end
+end)
 
-ifKickThenF()
-
-CustomNotify("Script Loaded", "Kick NotificationV2.5 Activated", 3, false)
+CustomNotify("Script Loaded", "Kick NotificationV2.6 Activated", 3, false)
