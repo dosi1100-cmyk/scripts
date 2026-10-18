@@ -1,0 +1,31 @@
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+local skipNames = {
+    HumanoidRootPart = true,
+    CamPart = true,
+    RagdollLimbPart = true,
+    TypingKeyboardMyWorld = true,
+}
+
+task.spawn(function()
+    while task.wait(0.25) do
+        local character = localPlayer.Character
+        if character then
+            for _, child in ipairs(character:GetChildren()) do
+                if not skipNames[child.Name] then
+                    if child:IsA("BasePart") and child.Transparency == 1 then
+                        child.Transparency = 0
+                    end
+                    if child:IsA("Accessory") then
+                        for _, part in ipairs(child:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                part.Transparency = 0
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
