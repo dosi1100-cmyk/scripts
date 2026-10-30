@@ -88,11 +88,10 @@ local function FlagPlayer(fromPlr, isExplosive)
     local data = AL.fireCount[fromPlr]
     if not data then return end
 
-    if AL.charBeamMove then
+    if AL.charBeamMove and AL.charBeamMove.Enabled then
         AL.charBeamMove.Enabled = false
+        DestroyAllGrabParts()
     end
-
-    DestroyAllGrabParts()
 
     data.isFlagged = true
 
