@@ -44,7 +44,7 @@ end
 local AL = getgenv()._AntiLagScript
 AL.charBeamMove = plr:WaitForChild("PlayerScripts"):WaitForChild("CharacterAndBeamMove", 5)
 
-local lastDestroyFrame = -1
+local DESTROY_DELAY = 1.5
 
 local function UpdateCharBeamState()
     if not AL.charBeamMove then return end
@@ -67,9 +67,6 @@ local function UpdateCharBeamState()
 end
 
 local function DestroyAllGrabParts()
-    if lastDestroyFrame == AL.globalFrame then return end
-    lastDestroyFrame = AL.globalFrame
-
     for _, player in ipairs(Players:GetPlayers()) do
         local char = player.Character
         if char then
@@ -90,7 +87,7 @@ local function FlagPlayer(fromPlr, isExplosive)
 
     if AL.charBeamMove and AL.charBeamMove.Enabled then
         AL.charBeamMove.Enabled = false
-        DestroyAllGrabParts()
+        task.delay(DESTROY_DELAY, DestroyAllGrabParts)
     end
 
     data.isFlagged = true
