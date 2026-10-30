@@ -70,24 +70,35 @@ local function DestroyAllGrabParts()
     for _, player in ipairs(Players:GetPlayers()) do
         local char = player.Character
         if char then
-            local target = char:FindFirstChild("GrabParts", true)
-            while target do
-                pcall(function()
-                    target:Destroy()
-                end)
-                target = char:FindFirstChild("GrabParts", true)
+            for _, obj in ipairs(char:GetDescendants()) do
+                if obj.Name == "GrabParts" then
+                    pcall(function()
+                        obj:Destroy()
+                    end)
+                end
             end
         end
     end
+end
+
+if AL.charBeamMove then
+    if AL.enabledConnection then
+        AL.enabledConnection:Disconnect()
+    end
+
+    AL.enabledConnection = AL.charBeamMove:GetPropertyChangedSignal("Enabled"):Connect(function()
+        if not AL.charBeamMove.Enabled then
+            task.delay(DESTROY_DELAY, DestroyAllGrabParts)
+        end
+    end)
 end
 
 local function FlagPlayer(fromPlr, isExplosive)
     local data = AL.fireCount[fromPlr]
     if not data then return end
 
-    if AL.charBeamMove and AL.charBeamMove.Enabled then
+    if AL.charBeamMove then
         AL.charBeamMove.Enabled = false
-        task.delay(DESTROY_DELAY, DestroyAllGrabParts)
     end
 
     data.isFlagged = true
