@@ -79,6 +79,7 @@ local function create3DImpactMarker(pos)
 end
 
 local function predictTrajectory(mainPart, v0, ignoreObj)
+    if not mainPart or not mainPart:IsA("BasePart") then return end
     local p0 = mainPart.Position
     local g = Vector3.new(0, -Workspace.Gravity, 0) 
     
@@ -199,7 +200,7 @@ RunService.RenderStepped:Connect(function()
                 mainPart = obj
             end
             
-            if mainPart then
+            if mainPart and mainPart:IsA("BasePart") then
                 local v0 = mainPart.AssemblyLinearVelocity
                 local isCurrentlyGrabbed = (obj == currentGrabbedObj)
                 
