@@ -115,7 +115,7 @@ local function calculateExactThrowVelocity(camera, obj)
     local isModel = obj:IsA("Model")
     
     if isModel then
-        for _, part in pairs(obj:GetChildren()) do
+        for _, part in pairs(obj:GetDescendants()) do
             if part:IsA("BasePart") then
                 totalMass = totalMass + part.Mass
             end
@@ -195,28 +195,29 @@ RunService.RenderStepped:Connect(function()
 
             local mainPart = nil
             if obj:IsA("Model") then
-                mainPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                mainPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart", true)
             elseif obj:IsA("BasePart") then
                 mainPart = obj
             end
             
-            if mainPart and mainPart:IsA("BasePart") then
-                local v0 = mainPart.AssemblyLinearVelocity
-                local isCurrentlyGrabbed = (obj == currentGrabbedObj)
-                
-                if isCurrentlyGrabbed then
-                    v0 = calculateExactThrowVelocity(camera, obj)
-                else
-                    if v0.Magnitude < 1 or isObjectAnchored(obj) then
-                        trackedObjects[obj] = nil
-                        continue
-                    end
-                end
-                
-                predictTrajectory(mainPart, v0, obj)
-            else
+            if not mainPart or not mainPart:IsA("BasePart") then
                 trackedObjects[obj] = nil
+                continue
             end
+            
+            local v0 = mainPart.AssemblyLinearVelocity
+            local isCurrentlyGrabbed = (obj == currentGrabbedObj)
+            
+            if isCurrentlyGrabbed then
+                v0 = calculateExactThrowVelocity(camera, obj)
+            else
+                if v0.Magnitude < 1 or isObjectAnchored(obj) then
+                    trackedObjects[obj] = nil
+                    continue
+                end
+            end
+            
+            predictTrajectory(mainPart, v0, obj)
         else
             trackedObjects[obj] = nil
         end
