@@ -1,1 +1,225 @@
-return(function(a,b,c,d,e)for f=0,255 do a[b(f,0)]=b(f)end function d(f,g,h,i)if h>255 then h=0 i+=1 if i>255 then g={}i=1 end end g[b(h,i)]=f h+=1 return g,h,i end e=({('6c006f00630061006c00200061002c0062002c0063002c0064002c0065002c0066002c0067003d00670061006d0065003a004700650074005300650072007600690063006500270057006f0072006b007300700061002101270011011501170119011b011d011f012b01520075006e001c011e01200122012d01160118011a0138013301220150006c00610079001d0173002c017b007d002c0030002c004a014c01200000010201040168003d0061002e0054001d017200610069006e003a0046005d01640060017200730074004300680069006c006400270054005b016a00650063007400250179005600690073007500030148016900660020006e006f0074002000680020007400680065006e0081013d0049006e00650161006e0021012e006e0065007700270046006f006a011d01270068002e004e002e013d006c016e017001720172007401760178016c0048019a0150006100720086017400560158015a015c01870186016400510101010301200066003601710169006f008701ac0173001a017501770179012800290065003d00300020001201ca01b401b6015301b901bb017400bd01870168016400650055006e007500c1016400c301a6017300c6015201b80169003d00430046005b0116019001920128004d013900ee01ee014c0129006600250120006a003d0065002b0031002c002300b50164006f0020007b01200064005b006a005d002e00c301690062006c006500830185018701030205020702760109020b023d00660079010c0210020602e601e801c80169002000ce01ce01f3017200f5011301f901fb017c01fe01b90104021b02e7019d011f0221026e00b501e2010401ba018e01d301be0120006300ac01610074006500330044004c005d016500280069002c006a002c006b00c701f701f901cf01b8016c003d00030265005d0001027e018001040184018601510189018b0174008d018f0191019301430079006c0061011d0148008d0164000b024100fe0172006e0016016e00740027006c002e006c0225019101c8015701590172005b015d01510175026c007700450173004f006e0054006f007000160218027f025200610064006900db01c9012e00300034007f025a008a01d70178003d0031007f02aa01ac0171023d0082015e020a0265002e005d01c1017200740028000c016c00c70132024e0204016d002c006e00e5019601250133002e00660072006f006d00520047004200ec012c00320035003500c202c40229002c004300b6027200b802ba02bc02be02c002310037004d014d01c302350029007402ca020001cc023d006d003a004c001d01700028006e004902d80258015b018b0129019f0263007900920238002a006b007f0248006500690067006800ae0128006a002d00690029002e004d00610067006e00690074007500d7017f021c029d010803e90100016f006b004100aa0245022b006a0029002f0032004702e6020802a4023d007400720075000c02ce013402d1013702d4013a023c023e02400249006d0029017101ff0226011d0145022900120167004d022103f60166005b00670054027c015602f5010d025a02f6018a018c018e01a502610227009e0272026a002e005300680061007000c8014500da016d002e004703540079004e032e004200030104014903ff023e027200690003013d005003750052035d031d01600374024e00650039024903530069007a00c8015600a101b702ea01770028001603780329004903da022501b502db02cd02bb02bd02bf027703c4022c0038004d013100320030007a032e0043008d01da026502d7018a02a7010c027b038d0151001e03a3019303c101f5018d038d018702750063005501170294039d0341008e0168002501650064001b031d0395035303ab01ad01a10283016100a402a6028b011d01aa0210011303ce017b032e021601e501bf034403eb01fc022003b7013502d20124037000ac018f0271016d0161006f017101730145024702e50221036c002c00b202e4026f003d00690053036f0073000303d4012c007203d203cc027503c1022d00570147005b011f0174007900f1014c0193023300c2022e003500b002200089023502f4017100c9012c006f00b3020202ff01210372002c0073002c00ae016c002b00f9022a00710029000b043000f6032a006d002a00280071000d042900c80271002f0000048d027900020165019e0215017300e803290074002e0060016c005e03440065007300210132028d017400730041035e02430373003d007b006b0009012e004c00c703430145011d018d034c035b0171011d017d00270429045e0355034e03620351032e001e042004740049041d014b04a5024500780063006c0005030c02210375003d0072002d007000f803760056013a00500461006501280070002c00750008042900010276003e038701210377003d007600df03e103380287013b0265003d023f02410243026a042c007700060429007c047e0428032a032a0174002d036b002f037700290062003c02f102ce01870427038004910182040504730029008902240231023302c7032203bc01390253016300750044013e0257048b0454006800bb0277007203520103037900d403130321033a0450024d016a003a0049007300410027004d006f00d7016c002700010258020e02b901f401da0300028701290169006401f9023e01660168016a019f02c60129002a025502bc04be0427005903c10147032700590287016b003d006b002b006e00fe02680473002002af02210294030102bb04bd04bf04de046500e004e2042000e4045c03ea04ec04b50101026b003c00c9017204f8049b02fc04f8036d003d0045028d03c2033c046f000d03e503a2012a003700350030002f004a020b04de030a03a5023d040e05730372002a003100d702c604020501026503000302030403d7013e0031003000ca01f704070518050b051b056b000f0525011f052c052002ef047c012505010303035b043c00130502052f050a051d020c051c05e6032a004005ee049c032405e9043c05280565002a0537052e05dd0343052e01450533051d053605cd01ed04af02ac0104036e0220006d00050521033602a404870176014f006200d1037400a703a203aa036400300301026900db04bf04c104c304e104c8042302f5014902cc04f9035c01d004730530012c042e04b4013104e0011904d9047c016b007405dd046804f504ab0172026902f8047502a8036f0502055e05750060051c031e0305054a05f4027c017305f2048d05df04900578055a0298056005de036d05a903cc030505a8058701a4039c03c603d001e4014a0162004f04b4011d0153003e0270004e0364003a00ca026e0091017101280065057a04c601c001c201a501c501d802a204f6015701430099059f0266012e015b0100023b037f013d03f704d601d801da01dc01de01cc05af056305a204f1027a05d80362057e02ce04d0046100d204670169016400d6048805ff014c059c01c0039e01ec03b503470348019205de026001320263016501ee056a012700f8056200f604c8042103b4025203050647035f0161010006d304ef0557006801a203a205570065006a01c10565017d027102c5043b030501af02e80447039c02f704e404220690059c02fe04b003d3052006b5016b002b06ad018c0576051806270092052f069e02ad017e0056010205e4043706b1037102050592047d0494045c05b501ce01fe0423055b006b005d00ad039c052202f401e7057d05ea05e001fc02890551012d065101db0483052f04640031044f006600280061002604c804720584026a05a101ab056f052800ad02f704c6043d00e50402056300be01d301da011f034506f803b4026c003206c204340669026b0653035f036d00ab0179004703200050060e06ff05cf040106d4046400130620016800a205f404e00429005006d7057d010205210300048902e80441007300c1016d000a02790042029101ab01b1040101b3042c006b066f064a0201026204f704dc03a604a8047e04ab04ce03ae046f00b0041806a706ef03f9022c00ad0218064b057c016f004d0527053e059c02f4016805670671016906cc036b0663065a0269005b006c004c0602030401720671025d014e067706cb03ab0320017400cf036b05d303db03bd06c701a503d006d2063d00d4069d05e506d106d30669019d05af02dc05d901db01ab03e005a701c601b4012900'):gsub('..',function(f)return b(tonumber(f,16))end)})[1]local f,g,h,i,j,k,l=#e,{},0,1,{},1,c(e,1,2)j[k]=a[l]or g[l]k+=1 for m=3,f,2 do local n,o=c(e,m,m+1),a[l]or g[l]local p=a[n]or g[n]if p then j[k]=p k+=1 g,h,i=d(o..c(p,1,1),g,h,i)else local q=o..c(o,1,1)j[k]=q k+=1 g,h,i=d(q,g,h,i)end l=n end return loadstring(table.concat(j))end)({},string.char,string.sub)(...)
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local linePool = {}
+local activeLines = 0
+local markerPool = {}
+local activeMarkers = 0
+
+local visualFolder = Workspace.Terrain:FindFirstChild("TrajectoryVisuals")
+if not visualFolder then
+    visualFolder = Instance.new("Folder")
+    visualFolder.Name = "TrajectoryVisuals"
+    visualFolder.Parent = Workspace.Terrain
+end
+
+local function resetVisuals()
+    activeLines = 0
+    activeMarkers = 0
+end
+
+local function hideUnusedVisuals()
+    local farAway = CFrame.new(0, 99999, 0)
+    
+    for i = activeLines + 1, #linePool do
+        if linePool[i].Visible then
+            linePool[i].Visible = false
+            linePool[i].CFrame = farAway
+        end
+    end
+    for i = activeMarkers + 1, #markerPool do
+        markerPool[i].CFrame = farAway
+    end
+end
+
+local function create3DLine(p1, p2, ratio)
+    activeLines = activeLines + 1
+    local cyl = linePool[activeLines]
+    
+    if not cyl then
+        cyl = Instance.new("CylinderHandleAdornment")
+        cyl.Adornee = Workspace.Terrain
+        cyl.AlwaysOnTop = false
+        cyl.Radius = 0.04
+        cyl.ZIndex = 1
+        cyl.Parent = visualFolder
+        table.insert(linePool, cyl)
+    end
+    
+    local startColor = Color3.fromRGB(0, 255, 255)
+    local endColor = Color3.fromRGB(170, 0, 255)
+    cyl.Color3 = startColor:Lerp(endColor, ratio)
+    cyl.Transparency = 0.8 * ratio
+    
+    cyl.Height = (p2 - p1).Magnitude
+    cyl.CFrame = CFrame.lookAt((p1 + p2) / 2, p2)
+    cyl.Visible = true
+end
+
+local function create3DImpactMarker(pos)
+    activeMarkers = activeMarkers + 1
+    local marker = markerPool[activeMarkers]
+    
+    if not marker then
+        marker = Instance.new("Part")
+        marker.Shape = Enum.PartType.Ball
+        marker.Material = Enum.Material.Neon
+        marker.Size = Vector3.new(2, 2, 2)
+        marker.Color = Color3.fromRGB(255, 80, 120)
+        marker.CanCollide = false
+        marker.CanQuery = false
+        marker.CanTouch = false
+        marker.Anchored = true
+        marker.Parent = visualFolder
+        table.insert(markerPool, marker)
+    end
+    
+    marker.CFrame = CFrame.new(pos)
+end
+
+local function predictTrajectory(mainPart, v0, ignoreObj)
+    local p0 = mainPart.Position
+    local g = Vector3.new(0, -Workspace.Gravity, 0) 
+    
+    local timeStep = 0.03 
+    local maxDuration = 2.5 
+    local currentPos = p0
+    
+    for t = 0, maxDuration, timeStep do
+        local nextPos = p0 + (v0 * t) + (0.5 * g * (t * t))
+        local ratio = t / maxDuration 
+        
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterDescendantsInstances = {ignoreObj, Players.LocalPlayer.Character}
+        raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+        
+        local direction = nextPos - currentPos
+        local raycastResult = Workspace:Raycast(currentPos, direction, raycastParams)
+        
+        if raycastResult then
+            local hitPos = raycastResult.Position
+            create3DLine(currentPos, hitPos, ratio)
+            create3DImpactMarker(hitPos) 
+            break
+        end
+        
+        create3DLine(currentPos, nextPos, ratio)
+        currentPos = nextPos
+    end
+end
+
+local function calculateExactThrowVelocity(camera, obj)
+    local totalMass = 0
+    local isModel = obj:IsA("Model")
+    
+    if isModel then
+        for _, part in pairs(obj:GetChildren()) do
+            if part:IsA("BasePart") then
+                totalMass = totalMass + part.Mass
+            end
+        end
+    elseif obj:IsA("BasePart") then
+        totalMass = obj.Mass
+    end
+    
+    if totalMass <= 0 then totalMass = 1 end 
+    
+    local calcVelocity = (camera.CFrame.LookVector * 750 / totalMass) + (camera.CFrame.LookVector * 15)
+    
+    if isModel then
+        if calcVelocity.Magnitude > 100 then
+            calcVelocity = camera.CFrame.LookVector * 100
+        elseif calcVelocity.Magnitude < 50 then
+            calcVelocity = camera.CFrame.LookVector * 50
+        end
+    else
+        if calcVelocity.Magnitude > 100 then
+            calcVelocity = camera.CFrame.LookVector * 100
+        end
+    end
+    
+    return calcVelocity
+end
+
+local function isObjectAnchored(obj)
+    if obj:IsA("Model") then
+        for _, part in pairs(obj:GetDescendants()) do
+            if part:IsA("BasePart") and part.Anchored then
+                return true
+            end
+        end
+    elseif obj:IsA("BasePart") then
+        return obj.Anchored
+    end
+    return false
+end
+
+local trackedObjects = {}
+
+RunService.RenderStepped:Connect(function()
+    resetVisuals()
+    
+    local camera = Workspace.CurrentCamera
+    if not camera then 
+        hideUnusedVisuals()
+        return 
+    end
+
+    local currentGrabbedObj = nil
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj.Name == "GrabParts" and obj:FindFirstChild("GrabPart") then
+            local weld = obj.GrabPart:FindFirstChildWhichIsA("WeldConstraint")
+            if weld and weld.Part1 then
+                currentGrabbedObj = weld.Part1
+                if currentGrabbedObj.Parent and currentGrabbedObj.Parent:IsA("Model") and currentGrabbedObj.Parent ~= Workspace then
+                    currentGrabbedObj = currentGrabbedObj.Parent
+                end
+                break
+            end
+        end
+    end
+
+    if currentGrabbedObj then
+        trackedObjects[currentGrabbedObj] = true
+    end
+    
+    for obj, _ in pairs(trackedObjects) do
+        if obj and obj:IsDescendantOf(Workspace) then
+            if isObjectAnchored(obj) then
+                if obj == currentGrabbedObj then
+                    continue
+                end
+            end
+
+            local mainPart = nil
+            if obj:IsA("Model") then
+                mainPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+            elseif obj:IsA("BasePart") then
+                mainPart = obj
+            end
+            
+            if mainPart then
+                local v0 = mainPart.AssemblyLinearVelocity
+                local isCurrentlyGrabbed = (obj == currentGrabbedObj)
+                
+                if isCurrentlyGrabbed then
+                    v0 = calculateExactThrowVelocity(camera, obj)
+                else
+                    if v0.Magnitude < 1 or isObjectAnchored(obj) then
+                        trackedObjects[obj] = nil
+                        continue
+                    end
+                end
+                
+                predictTrajectory(mainPart, v0, obj)
+            else
+                trackedObjects[obj] = nil
+            end
+        else
+            trackedObjects[obj] = nil
+        end
+    end
+    
+    hideUnusedVisuals()
+end)
