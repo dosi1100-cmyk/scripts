@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
 local function createFakeLeg(character, torso, name, isLeft)
@@ -30,9 +29,13 @@ local function createFakeLeg(character, torso, name, isLeft)
 	return fakeLeg
 end
 
-local function isAttached(character, torso, name)
+local function hasLeg(character, torso, name)
+	local leg = character:FindFirstChild(name)
+	if not leg or not leg:IsA("BasePart") then
+		return false
+	end
 	for _, joint in ipairs(torso:GetChildren()) do
-		if joint:IsA("Motor6D") and joint.Part1 and joint.Part1.Name == name and joint.Part1.Parent == character then
+		if joint:IsA("Motor6D") and joint.Part1 == leg then
 			return true
 		end
 	end
@@ -46,32 +49,25 @@ local function setupCharacter(character)
 	character:WaitForChild("Left Leg", 5)
 	character:WaitForChild("Right Leg", 5)
 
-	local function checkLegs()
-		local leftAttached = isAttached(character, torso, "Left Leg")
-		local rightAttached = isAttached(character, torso, "Right Leg")
+	task.spawn(function()
+		while character.Parent and torso.Parent do
+			local leftOk = hasLeg(character, torso, "Left Leg")
+			local rightOk = hasLeg(character, torso, "Right Leg")
 
-		if not leftAttached and not rightAttached then
-			createFakeLeg(character, torso, "Left Leg", true)
-			createFakeLeg(character, torso, "Right Leg", false)
-		end
-	end
+			if not leftOk and not rightOk then
+				for _, name in ipairs({"Left Leg", "Right Leg"}) do
+					local old = character:FindFirstChild(name)
+					if old then
+						old:Destroy()
+					end
+				end
+				createFakeLeg(character, torso, "Left Leg", true)
+				createFakeLeg(character, torso, "Right Leg", false)
+			end
 
-	character.ChildRemoved:Connect(function(child)
-		if child.Name == "Left Leg" or child.Name == "Right Leg" then
-			task.defer(checkLegs)
+			task.wait(0.2)
 		end
 	end)
-
-	local connection
-	connection = RunService.Heartbeat:Connect(function()
-		if not character.Parent or not torso.Parent then
-			connection:Disconnect()
-			return
-		end
-		checkLegs()
-	end)
-
-	checkLegs()
 end
 
 if localPlayer.Character then
