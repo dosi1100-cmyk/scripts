@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local localPlayer = Players.LocalPlayer
 
 local function createFakeLeg(character, torso, name, isLeft)
@@ -29,6 +30,15 @@ local function createFakeLeg(character, torso, name, isLeft)
 	return fakeLeg
 end
 
+local function isAttached(character, torso, name)
+	for _, joint in ipairs(torso:GetChildren()) do
+		if joint:IsA("Motor6D") and joint.Part1 and joint.Part1.Name == name and joint.Part1.Parent == character then
+			return true
+		end
+	end
+	return false
+end
+
 local function setupCharacter(character)
 	local torso = character:WaitForChild("Torso", 10)
 	if not torso then return end
@@ -37,10 +47,10 @@ local function setupCharacter(character)
 	character:WaitForChild("Right Leg", 5)
 
 	local function checkLegs()
-		local leftLeg = character:FindFirstChild("Left Leg")
-		local rightLeg = character:FindFirstChild("Right Leg")
+		local leftAttached = isAttached(character, torso, "Left Leg")
+		local rightAttached = isAttached(character, torso, "Right Leg")
 
-		if not leftLeg and not rightLeg then
+		if not leftAttached and not rightAttached then
 			createFakeLeg(character, torso, "Left Leg", true)
 			createFakeLeg(character, torso, "Right Leg", false)
 		end
@@ -50,6 +60,15 @@ local function setupCharacter(character)
 		if child.Name == "Left Leg" or child.Name == "Right Leg" then
 			task.defer(checkLegs)
 		end
+	end)
+
+	local connection
+	connection = RunService.Heartbeat:Connect(function()
+		if not character.Parent or not torso.Parent then
+			connection:Disconnect()
+			return
+		end
+		checkLegs()
 	end)
 
 	checkLegs()
