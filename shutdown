@@ -1,6 +1,6 @@
 local RS = game:GetService("ReplicatedStorage")
 local Event1 = RS:WaitForChild("DataEvents"):WaitForChild("UpdateTexturesChoice")
-    Event1:FireServer(("nigga"):rep(1e6))
+    Event1:FireServer(("nigga"):rep(5e6))
 
     task.wait()
 
