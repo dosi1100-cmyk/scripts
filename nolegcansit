@@ -10,6 +10,20 @@ local function createFakeLeg(character, torso, name, isLeft)
 	fakeLeg.Massless = false
 	fakeLeg.Parent = character
 
+	local ragdollPart = Instance.new("Part")
+	ragdollPart.Name = "RagdollLimbPart"
+	ragdollPart.Size = Vector3.new(1, 2, 1)
+	ragdollPart.Transparency = 1
+	ragdollPart.CanCollide = false
+	ragdollPart.Massless = true
+	ragdollPart.CFrame = fakeLeg.CFrame
+	ragdollPart.Parent = fakeLeg
+
+	local ragdollWeld = Instance.new("WeldConstraint")
+	ragdollWeld.Part0 = fakeLeg
+	ragdollWeld.Part1 = ragdollPart
+	ragdollWeld.Parent = ragdollPart
+
 	local hip = Instance.new("Motor6D")
 	hip.Name = isLeft and "Left Hip" or "Right Hip"
 	hip.Part0 = torso
